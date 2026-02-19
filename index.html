@@ -1,0 +1,2647 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nosso Clube - Cardápio Digital</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+            /* Estilos para status dos pedidos */
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-preparing {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.status-delivered {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+/* Botões de status */
+.status-btn {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.pending-btn {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.pending-btn:hover:not(:disabled) {
+    background-color: #ffe69c;
+}
+
+.preparing-btn {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.preparing-btn:hover:not(:disabled) {
+    background-color: #9fc9ff;
+}
+
+.delivered-btn {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.delivered-btn:hover:not(:disabled) {
+    background-color: #a3d9b1;
+}
+
+.status-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Animações */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+@keyframes ring {
+    0% { transform: rotate(0deg); }
+    10% { transform: rotate(15deg); }
+    20% { transform: rotate(-15deg); }
+    30% { transform: rotate(10deg); }
+    40% { transform: rotate(-10deg); }
+    50% { transform: rotate(5deg); }
+    60% { transform: rotate(-5deg); }
+    70% { transform: rotate(0deg); }
+    100% { transform: rotate(0deg); }
+}
+
+/* Melhorias no modal de alerta */
+.modal-overlay {
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Destaque para novos pedidos */
+.order-card[data-novo="true"] {
+    animation: highlight 2s;
+}
+
+@keyframes highlight {
+    0% { background-color: #fff3cd; }
+    100% { background-color: white; }
+}
+        :root {
+            --primary-color: #d35400;
+            --secondary-color: #2c3e50;
+            --light-color: #f9f9f9;
+            --dark-color: #333;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --club-color: #8e44ad;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark-color);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--secondary-color), var(--club-color));
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo i {
+            color: var(--warning-color);
+            font-size: 2rem;
+        }
+        
+        .logo span {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .cart-button, .admin-toggle {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+        
+        .cart-button {
+            background-color: var(--primary-color);
+            color: white;
+            position: relative;
+        }
+        
+        .cart-button:hover {
+            background-color: #a84300;
+            transform: scale(1.05);
+        }
+        
+        .admin-toggle {
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+        
+        .admin-toggle:hover {
+            background-color: white;
+            color: var(--club-color);
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: white;
+            color: var(--primary-color);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        
+        .notification-badge {
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+        
+        /* Main content */
+        main {
+            padding: 2rem 0;
+            min-height: calc(100vh - 160px);
+        }
+        
+        .page-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--secondary-color);
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .page-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--club-color));
+        }
+        
+        /* Pratos do Dia */
+        .daily-specials {
+            background: linear-gradient(135deg, var(--secondary-color), var(--club-color));
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+            box-shadow: var(--shadow);
+        }
+        
+        .specials-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .specials-header i {
+            font-size: 2.5rem;
+            color: var(--warning-color);
+        }
+        
+        .specials-header h2 {
+            font-size: 1.8rem;
+        }
+        
+        .specials-header h2 small {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            display: block;
+        }
+        
+        .specials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .special-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            transition: transform 0.3s;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .special-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.15);
+        }
+        
+        .special-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 3px solid var(--warning-color);
+        }
+        
+        .special-tag {
+            background: var(--warning-color);
+            color: var(--secondary-color);
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+        
+        .original-price {
+            text-decoration: line-through;
+            opacity: 0.7;
+            margin-right: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .discount-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--warning-color);
+        }
+        
+        /* Menu Categorias */
+        .menu-categories {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .category-btn {
+            padding: 8px 20px;
+            border: 2px solid var(--primary-color);
+            background: white;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .category-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .category-btn.special-btn {
+            border-color: var(--warning-color);
+            color: var(--warning-color);
+        }
+        
+        .category-btn.special-btn.active {
+            background: var(--warning-color);
+            color: white;
+        }
+        
+        /* Layout do Menu */
+        .menu-layout {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+        }
+        
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .menu-item {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .menu-item.special-item-card {
+            border: 2px solid var(--warning-color);
+        }
+        
+        .special-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--warning-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            z-index: 1;
+        }
+        
+        .item-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        
+        .item-details {
+            padding: 1rem;
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .item-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+        
+        .item-price {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .item-price.special-price {
+            color: var(--warning-color);
+        }
+        
+        .original-price-small {
+            font-size: 0.8rem;
+            text-decoration: line-through;
+            color: #999;
+            margin-left: 5px;
+        }
+        
+        .item-description {
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+        
+        .item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .item-category {
+            background: #e8f4fc;
+            color: var(--secondary-color);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .add-to-cart-btn {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+            transition: background 0.3s;
+        }
+        
+        .add-to-cart-btn:hover {
+            background: #219a52;
+        }
+        
+        /* Carrinho */
+        .cart-sidebar {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 90px;
+            height: fit-content;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+        
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .cart-header h3 {
+            color: var(--club-color);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .clear-cart-btn {
+            background: none;
+            border: none;
+            color: var(--danger-color);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        
+        .clear-cart-btn:hover {
+            background: #fee;
+        }
+        
+        .cart-items {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+        
+        .cart-item {
+            display: grid;
+            grid-template-columns: 50px 1fr auto;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            position: relative;
+        }
+        
+        .cart-item-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        
+        .cart-item-details h4 {
+            font-size: 0.9rem;
+            margin-bottom: 3px;
+        }
+        
+        .cart-item-price {
+            font-size: 0.8rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .cart-item-quantity {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        
+        .quantity-btn {
+            width: 25px;
+            height: 25px;
+            border: none;
+            background: #f0f0f0;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .quantity-btn:hover {
+            background: #ddd;
+        }
+        
+        .cart-item-total {
+            font-weight: 600;
+            font-size: 0.9rem;
+            grid-column: 1 / -1;
+            text-align: right;
+            margin-top: 5px;
+        }
+        
+        .remove-item-btn {
+            position: absolute;
+            top: 5px;
+            right: 0;
+            background: none;
+            border: none;
+            color: var(--danger-color);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 5px;
+        }
+        
+        .cart-total {
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        
+        .cart-total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .cart-total-row.final {
+            font-weight: 700;
+            color: var(--club-color);
+            border-top: 2px solid #ddd;
+            padding-top: 8px;
+            margin-top: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .checkout-form input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.95rem;
+        }
+        
+        .checkout-form input:focus {
+            outline: 2px solid var(--club-color);
+        }
+        
+        .checkout-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+        
+        .checkout-btn:hover:not(:disabled) {
+            background: #219a52;
+        }
+        
+        .checkout-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        /* Admin Panel */
+        #admin-panel, #login-screen {
+            display: none;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, var(--secondary-color), var(--club-color));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .admin-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--primary-color);
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+        
+        .admin-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .admin-btn.delete {
+            border-color: var(--danger-color);
+            color: var(--danger-color);
+        }
+        
+        .admin-btn.delete:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+        
+        .admin-tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            position: relative;
+            white-space: nowrap;
+        }
+        
+        .admin-tab.active {
+            color: var(--club-color);
+        }
+        
+        .admin-tab.active:after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--club-color);
+        }
+        
+        .admin-tab-content {
+            display: none;
+        }
+        
+        .admin-tab-content.active {
+            display: block;
+        }
+        
+        /* Formulário */
+        .form-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            display: none;
+        }
+        
+        .form-container.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.95rem;
+        }
+        
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .special-price-input {
+            display: none;
+        }
+        
+        .special-price-input.active {
+            display: block;
+        }
+        
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .image-preview.active {
+            display: block;
+        }
+        
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: var(--club-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #6c3483;
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        /* Listas Admin */
+        .admin-items-list, .orders-list {
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .admin-item {
+            display: grid;
+            grid-template-columns: 80px 1fr auto;
+            gap: 15px;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+            position: relative;
+        }
+        
+        .admin-item.special-admin-item {
+            background: #fff9e6;
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .special-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--warning-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+        
+        .admin-item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        
+        .admin-item-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+        
+        .edit-btn {
+            background: #3498db;
+            color: white;
+        }
+        
+        .delete-btn {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .special-btn-small {
+            background: var(--warning-color);
+            color: white;
+        }
+        
+        /* Pedidos */
+        .order-card {
+            background: white;
+            border-left: 5px solid var(--club-color);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .order-id {
+            font-weight: 700;
+            color: var(--club-color);
+        }
+        
+        .order-status {
+            background: #fff3cd;
+            color: #856404;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        .customer-info {
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        
+        .order-item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .order-total {
+            text-align: right;
+            font-weight: 700;
+            color: var(--club-color);
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid #eee;
+            font-size: 1.1rem;
+        }
+        
+        .print-btn {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-left: auto;
+        }
+        
+        /* Login */
+        .login-container {
+            max-width: 400px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2.5rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+        
+        .login-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--club-color);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--club-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .login-message {
+            color: var(--danger-color);
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+        
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+        
+        .toast-notification {
+            background: var(--success-color);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow);
+            animation: slideIn 0.3s;
+            position: relative;
+            padding-right: 30px;
+        }
+        
+        .toast-notification.error {
+            background: var(--danger-color);
+        }
+        
+        .toast-notification .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalIn 0.3s;
+        }
+        
+        @keyframes modalIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+        
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, var(--secondary-color), var(--club-color));
+            color: white;
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: 2rem;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .menu-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .cart-sidebar {
+                position: static;
+                margin-top: 1rem;
+            }
+            
+            .specials-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .admin-item {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .admin-item-image {
+                margin: 0 auto;
+            }
+            
+            .admin-item-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-crown"></i>
+                Nosso Clube
+                <span>Cardápio</span>
+            </div>
+            <div class="header-actions">
+                <button class="cart-button" id="cartToggle">
+                    <i class="fas fa-shopping-cart"></i>
+                    Pedido
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+                <button class="admin-toggle" id="adminToggle">
+                    <i class="fas fa-user-cog"></i>
+                    Admin
+                    <span class="notification-badge" id="adminNotification" style="display:none;">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <main class="container">
+        <!-- Cardápio -->
+        <section id="menu-view">
+            <h1 class="page-title">🍽️ Cardápio do Nosso Clube</h1>
+            
+            <!-- Pratos do Dia -->
+            <div class="daily-specials" id="dailySpecials">
+                <div class="specials-header">
+                    <i class="fas fa-star"></i>
+                    <h2>Pratos do Dia <small>Ofertas exclusivas para membros</small></h2>
+                </div>
+                <div class="specials-grid" id="specialsGrid"></div>
+            </div>
+            
+            <!-- Categorias -->
+            <div class="menu-categories">
+                <button class="category-btn active" data-category="all">Todos</button>
+                <button class="category-btn" data-category="comidas">Comidas</button>
+                <button class="category-btn" data-category="bebidas">Bebidas</button>
+                <button class="category-btn" data-category="sobremesas">Sobremesas</button>
+                <button class="category-btn special-btn" data-category="specials">⭐ Especiais</button>
+            </div>
+            
+            <!-- Menu e Carrinho -->
+            <div class="menu-layout">
+                <div class="menu-grid" id="menuGrid"></div>
+                
+                <div class="cart-sidebar" id="cartSidebar">
+                    <div class="cart-header">
+                        <h3><i class="fas fa-shopping-cart"></i> Meu Pedido</h3>
+                        <button class="clear-cart-btn" id="clearCartBtn">
+                            <i class="fas fa-trash"></i> Limpar
+                        </button>
+                    </div>
+                    
+                    <div class="cart-items" id="cartItems">
+                        <p style="text-align: center; color: #999;">Seu pedido está vazio</p>
+                    </div>
+                    
+                    <div class="cart-total" id="cartTotal">
+                        <div class="cart-total-row">
+                            <span>Subtotal:</span>
+                            <span>R$ 0,00</span>
+                        </div>
+                        <div class="cart-total-row final">
+                            <span>Total:</span>
+                            <span>R$ 0,00</span>
+                        </div>
+                    </div>
+                    
+                    <form class="checkout-form" id="checkoutForm">
+                        <input type="text" id="customerName" placeholder="Seu nome" required>
+                        <input type="tel" id="customerPhone" placeholder="WhatsApp" required>
+                        <button type="submit" class="checkout-btn" id="checkoutBtn" disabled>
+                            Finalizar Pedido
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Painel Admin -->
+        <section id="admin-panel">
+            <div class="admin-header">
+                <h2><i class="fas fa-crown"></i> Painel do Clube</h2>
+            </div>
+            
+            <div class="admin-actions">
+                <button class="admin-btn" id="addItemBtn">
+                    <i class="fas fa-plus"></i> Novo Item
+                </button>
+                <button class="admin-btn delete" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+            </div>        
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="items">📋 Itens</button>
+                <button class="admin-tab" data-tab="specials">⭐ Pratos do Dia</button>
+                <button class="admin-tab" data-tab="orders">📦 Pedidos</button>
+            </div>
+            
+            <div class="admin-tab-content active" id="itemsTab">
+                <div class="form-container" id="itemForm">
+                    <h3 id="formTitle">Novo Item</h3>
+                    <form id="itemFormElement">
+                        <div class="form-group">
+                            <label>Nome</label>
+                            <input type="text" id="itemName" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Categoria</label>
+                            <select id="itemCategory" required>
+                                <option value="">Selecione</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Preço</label>
+                            <input type="number" id="itemPrice" step="0.01" required>
+                        </div>
+                        
+                        <div class="form-checkbox">
+                            <input type="checkbox" id="isSpecial">
+                            <label>Prato do Dia (em promoção)</label>
+                        </div>
+                        
+                        <div class="special-price-input" id="specialPriceGroup">
+                            <div class="form-group">
+                                <label>Preço Promocional</label>
+                                <input type="number" id="specialPrice" step="0.01">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Descrição</label>
+                            <textarea id="itemDescription" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Imagem</label>
+                            <input type="file" id="itemImage" accept="image/*">
+                            <img id="imagePreview" class="image-preview">
+                        </div>
+                        
+                        <input type="hidden" id="itemId">
+                        
+                        <div class="form-buttons">
+                            <button type="button" class="btn btn-secondary" id="cancelBtn">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div id="adminItemsList"></div>
+            </div>
+            
+            <div class="admin-tab-content" id="specialsTab">
+                <h3 style="margin-bottom: 1rem;">Pratos em Destaque</h3>
+                <div id="specialsAdminContainer"></div>
+            </div>
+            
+            <div class="admin-tab-content" id="ordersTab">
+                <h3 style="margin-bottom: 1rem;">Pedidos Recebidos</h3>
+                <div id="ordersContainer"></div>
+            </div>
+        </section>
+        
+        <!-- Login -->
+        <section id="login-screen">
+            <div class="login-container">
+                <h2 class="login-title"><i class="fas fa-crown"></i> Área do Clube</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>Usuário</label>
+                        <input type="text" id="adminUsername" value="admin" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" id="adminPassword" required>
+                    </div>
+                    <button type="submit" class="login-btn">Entrar</button>
+                    <div class="login-message" id="loginMessage">Senha incorreta</div>
+                </form>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p><i class="fas fa-crown"></i> Nosso Clube - O melhor cardápio para você</p>
+            <p style="font-size: 0.9rem; opacity: 0.8;">Faça seu pedido e aproveite</p>
+        </div>
+    </footer>
+    
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <div class="modal-overlay" id="alertModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle"><i class="fas fa-bell"></i> Novo Pedido!</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Fechar</button>
+                <button class="btn btn-primary" onclick="viewOrders()">Ver Pedidos</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração
+        const API_URL = 'https://nosso-clube-api.onrender.com/api';
+        let token = localStorage.getItem('token');
+        let menuItems = [];
+        let categorias = [];
+        let cart = [];
+        let orders = [];
+        let isAdminMode = false;
+        let isLoggedIn = !!token;
+        let editingItemId = null;
+        let unreadOrders = 0;
+        
+        // Elementos DOM
+        const menuView = document.getElementById('menu-view');
+        const adminPanel = document.getElementById('admin-panel');
+        const loginScreen = document.getElementById('login-screen');
+        const adminToggle = document.getElementById('adminToggle');
+        const cartToggle = document.getElementById('cartToggle');
+        const cartSidebar = document.getElementById('cartSidebar');
+        const cartCount = document.getElementById('cartCount');
+        const cartItems = document.getElementById('cartItems');
+        const cartTotal = document.getElementById('cartTotal');
+        const clearCartBtn = document.getElementById('clearCartBtn');
+        const checkoutForm = document.getElementById('checkoutForm');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const menuGrid = document.getElementById('menuGrid');
+        const specialsGrid = document.getElementById('specialsGrid');
+        const adminItemsContainer = document.getElementById('adminItemsList');
+        const specialsAdminContainer = document.getElementById('specialsAdminContainer');
+        const ordersContainer = document.getElementById('ordersContainer');
+        const categoryButtons = document.querySelectorAll('.category-btn');
+        const adminTabs = document.querySelectorAll('.admin-tab');
+        const itemsTab = document.getElementById('itemsTab');
+        const specialsTab = document.getElementById('specialsTab');
+        const ordersTab = document.getElementById('ordersTab');
+        const addItemBtn = document.getElementById('addItemBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const itemForm = document.getElementById('itemForm');
+        const itemFormElement = document.getElementById('itemFormElement');
+        const formTitle = document.getElementById('formTitle');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const itemName = document.getElementById('itemName');
+        const itemCategory = document.getElementById('itemCategory');
+        const itemPrice = document.getElementById('itemPrice');
+        const itemDescription = document.getElementById('itemDescription');
+        const itemImage = document.getElementById('itemImage');
+        const imagePreview = document.getElementById('imagePreview');
+        const itemId = document.getElementById('itemId');
+        const isSpecial = document.getElementById('isSpecial');
+        const specialPriceGroup = document.getElementById('specialPriceGroup');
+        const specialPrice = document.getElementById('specialPrice');
+        const loginForm = document.getElementById('loginForm');
+        const loginMessage = document.getElementById('loginMessage');
+        const adminUsername = document.getElementById('adminUsername');
+        const adminPassword = document.getElementById('adminPassword');
+        const adminNotification = document.getElementById('adminNotification');
+        const customerName = document.getElementById('customerName');
+        const customerPhone = document.getElementById('customerPhone');
+        const toastContainer = document.getElementById('toastContainer');
+        const alertModal = document.getElementById('alertModal');
+        const modalBody = document.getElementById('modalBody');
+        
+        // Inicialização
+        async function init() {
+            await loadCategorias();
+            await loadItens();
+            updateCart();
+            setupEventListeners();
+            
+            if (isLoggedIn) {
+                showAdminPanel();
+            } else {
+                showMenuView();
+            }
+        }
+        
+        // API Calls
+        async function loadCategorias() {
+            try {
+                const response = await fetch(`${API_URL}/categorias`);
+                categorias = await response.json();
+                
+                itemCategory.innerHTML = '<option value="">Selecione</option>';
+                categorias.forEach(cat => {
+                    itemCategory.innerHTML += `<option value="${cat.id}">${cat.nome}</option>`;
+                });
+            } catch (error) {
+                console.error('Erro ao carregar categorias:', error);
+            }
+        }
+        
+       async function loadItens() {
+    try {
+        const response = await fetch(`${API_URL}/itens`);
+        const data = await response.json();
+        
+        // CORREÇÃO: Garantir que preços sejam números
+        menuItems = data.map(item => ({
+            ...item,
+            price: parseFloat(item.price) || 0,
+            specialPrice: item.specialPrice ? parseFloat(item.specialPrice) : null
+        }));
+        
+        renderMenuItems();
+        renderSpecialsSection();
+    } catch (error) {
+        console.error('Erro ao carregar itens:', error);
+    }
+}
+        
+        async function loadPedidos() {
+            try {
+                const response = await fetch(`${API_URL}/pedidos`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                orders = await response.json();
+                renderOrders();
+            } catch (error) {
+                console.error('Erro ao carregar pedidos:', error);
+            }
+        }
+        
+        // Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: adminUsername.value,
+                        password: adminPassword.value
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    token = data.token;
+                    localStorage.setItem('token', token);
+                    isLoggedIn = true;
+                    showAdminPanel();
+                    showToast('Bem-vindo ao painel do clube!', 'success');
+                } else {
+                    loginMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Erro no login:', error);
+            }
+        });
+        
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('token');
+            token = null;
+            isLoggedIn = false;
+            showMenuView();
+            showToast('Logout realizado', 'success');
+        });
+        
+        // Alternar entre views
+        adminToggle.addEventListener('click', () => {
+            if (isAdminMode) {
+                showMenuView();
+            } else {
+                if (isLoggedIn) {
+                    showAdminPanel();
+                } else {
+                    showLoginScreen();
+                }
+            }
+        });
+        
+        cartToggle.addEventListener('click', () => {
+            cartSidebar.classList.toggle('active');
+        });
+        
+        function showMenuView() {
+            menuView.style.display = 'block';
+            adminPanel.style.display = 'none';
+            loginScreen.style.display = 'none';
+            isAdminMode = false;
+        }
+        
+        function showAdminPanel() {
+            menuView.style.display = 'none';
+            adminPanel.style.display = 'block';
+            loginScreen.style.display = 'none';
+            isAdminMode = true;
+            renderAdminItems();
+            loadPedidos();
+        }
+        
+        function showLoginScreen() {
+            menuView.style.display = 'none';
+            adminPanel.style.display = 'none';
+            loginScreen.style.display = 'flex';
+            isAdminMode = false;
+        }
+        
+        // Renderização
+        function renderMenuItems(categoria = 'all') {
+    menuGrid.innerHTML = '';
+    
+    let filtered = [];
+    if (categoria === 'specials') {
+        filtered = menuItems.filter(item => item.isSpecial);
+    } else if (categoria === 'all') {
+        filtered = menuItems;
+    } else {
+        filtered = menuItems.filter(item => item.category === categoria);
+    }
+    
+    if (filtered.length === 0) {
+        menuGrid.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum item encontrado</p>';
+        return;
+    }
+    
+    filtered.forEach(item => {
+        // CORREÇÃO: Garantir que preço seja número
+        const precoNumerico = parseFloat(item.price) || 0;
+        const precoOriginalNumerico = parseFloat(item.originalPrice) || precoNumerico;
+        const precoPromocionalNumerico = parseFloat(item.specialPrice) || (precoNumerico * 0.8);
+        
+        const isSpecial = item.isSpecial;
+        const displayPrice = isSpecial ? precoPromocionalNumerico : precoNumerico;
+        
+        const card = document.createElement('div');
+        card.className = `menu-item ${isSpecial ? 'special-item-card' : ''}`;
+        
+        let priceHTML = '';
+        if (isSpecial) {
+            priceHTML = `
+                <span class="item-price special-price">R$ ${displayPrice.toFixed(2)}</span>
+                <span class="original-price-small">R$ ${precoOriginalNumerico.toFixed(2)}</span>
+            `;
+        } else {
+            priceHTML = `<span class="item-price">R$ ${displayPrice.toFixed(2)}</span>`;
+        }
+        
+        card.innerHTML = `
+            ${isSpecial ? '<span class="special-badge"><i class="fas fa-star"></i> PRATO DO DIA</span>' : ''}
+            <img src="${item.image || 'https://via.placeholder.com/300x200'}" class="item-image">
+            <div class="item-details">
+                <div class="item-header">
+                    <h3 class="item-name">${item.name}</h3>
+                    ${priceHTML}
+                </div>
+                <p class="item-description">${item.description || ''}</p>
+                <div class="item-footer">
+                    <span class="item-category">${item.category}</span>
+                    <button class="add-to-cart-btn" onclick='addToCart(${JSON.stringify({
+                        ...item,
+                        price: displayPrice,
+                        originalPrice: precoOriginalNumerico
+                    })})'>
+                        <i class="fas fa-cart-plus"></i> Add
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        menuGrid.appendChild(card);
+    });
+}
+        function renderSpecialsSection() {
+            const specials = menuItems.filter(item => item.isSpecial);
+            specialsGrid.innerHTML = '';
+            
+            if (specials.length === 0) {
+                specialsGrid.innerHTML = '<p style="color: rgba(255,255,255,0.8);">Nenhum prato especial hoje</p>';
+                return;
+            }
+            
+            specials.forEach(item => {
+                const displayPrice = item.specialPrice || item.price * 0.8;
+                
+                const card = document.createElement('div');
+                card.className = 'special-item';
+                card.innerHTML = `
+                    <img src="${item.image || 'https://via.placeholder.com/80x80'}" class="special-image">
+                    <div>
+                        <span class="special-tag"><i class="fas fa-star"></i> EXCLUSIVO</span>
+                        <h3>${item.name}</h3>
+                        <p style="font-size: 0.85rem; opacity: 0.9;">${item.description || ''}</p>
+                        <div style="margin: 5px 0;">
+                            <span class="original-price">R$ ${item.price.toFixed(2)}</span>
+                            <span class="discount-price">R$ ${displayPrice.toFixed(2)}</span>
+                        </div>
+                        <button class="add-to-cart-btn" style="margin-top: 5px;" onclick='addToCart(${JSON.stringify({
+                            ...item,
+                            price: displayPrice,
+                            originalPrice: item.price
+                        })})'>
+                            <i class="fas fa-cart-plus"></i> Adicionar
+                        </button>
+                    </div>
+                `;
+                
+                specialsGrid.appendChild(card);
+            });
+        }
+        
+        function renderAdminItems() {
+            adminItemsContainer.innerHTML = '';
+            
+            if (menuItems.length === 0) {
+                adminItemsContainer.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum item cadastrado</p>';
+                return;
+            }
+            
+            menuItems.forEach(item => {
+                const div = document.createElement('div');
+                div.className = `admin-item ${item.isSpecial ? 'special-admin-item' : ''}`;
+                div.innerHTML = `
+                    <img src="${item.image || 'https://via.placeholder.com/80x80'}" class="admin-item-image">
+                    <div>
+                        <h4>${item.name}</h4>
+                        <p>R$ ${item.price.toFixed(2)} ${item.isSpecial ? `<br><small style="color: var(--warning-color);">Promo: R$ ${(item.specialPrice || item.price * 0.8).toFixed(2)}</small>` : ''}</p>
+                        <span class="item-category">${item.category}</span>
+                    </div>
+                    <div class="admin-item-actions">
+                        <button class="action-btn edit-btn" onclick="editItem(${item.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete-btn" onclick="deleteItem(${item.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        ${!item.isSpecial ? 
+                            `<button class="action-btn special-btn-small" onclick="makeSpecial(${item.id})">
+                                <i class="fas fa-star"></i>
+                            </button>` : 
+                            `<button class="action-btn special-btn-small" onclick="removeSpecial(${item.id})">
+                                <i class="fas fa-star"></i>
+                            </button>`
+                        }
+                    </div>
+                `;
+                
+                adminItemsContainer.appendChild(div);
+            });
+        }
+        
+        function renderSpecialsAdmin() {
+            const specials = menuItems.filter(item => item.isSpecial);
+            specialsAdminContainer.innerHTML = '';
+            
+            if (specials.length === 0) {
+                specialsAdminContainer.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum prato em promoção</p>';
+                return;
+            }
+            
+            specials.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'admin-item special-admin-item';
+                div.innerHTML = `
+                    <img src="${item.image || 'https://via.placeholder.com/80x80'}" class="admin-item-image">
+                    <div>
+                        <h4>${item.name}</h4>
+                        <p>De: R$ ${item.price.toFixed(2)}</p>
+                        <p style="color: var(--warning-color); font-weight: 700;">Por: R$ ${(item.specialPrice || item.price * 0.8).toFixed(2)}</p>
+                    </div>
+                    <div class="admin-item-actions">
+                        <button class="action-btn edit-btn" onclick="editItem(${item.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn special-btn-small" onclick="removeSpecial(${item.id})">
+                            <i class="fas fa-star"></i> Remover
+                        </button>
+                    </div>
+                `;
+                
+                specialsAdminContainer.appendChild(div);
+            });
+        }
+        
+       // Renderizar pedidos no admin com botões de status
+function renderOrders() {
+    ordersContainer.innerHTML = '';
+    
+    if (orders.length === 0) {
+        ordersContainer.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum pedido recebido</p>';
+        return;
+    }
+    
+    orders.forEach(order => {
+        const div = document.createElement('div');
+        div.className = 'order-card';
+        div.setAttribute('data-pedido-id', order.id);
+        
+        // Determinar a classe de status
+        let statusClass = '';
+        let statusText = '';
+        
+        switch(order.status) {
+            case 'pending':
+                statusClass = 'status-pending';
+                statusText = '⏳ Pendente';
+                break;
+            case 'preparing':
+                statusClass = 'status-preparing';
+                statusText = '👨‍🍳 Preparando';
+                break;
+            case 'delivered':
+                statusClass = 'status-delivered';
+                statusText = '✅ Finalizado';
+                break;
+            default:
+                statusClass = 'status-pending';
+                statusText = '⏳ Pendente';
+        }
+        
+        const itemsHtml = (order.itens || []).map(item => `
+            <div class="order-item-row">
+                <span>${item.quantidade}x Item #${item.item_id}</span>
+                <span>R$ ${parseFloat(item.subtotal).toFixed(2)}</span>
+            </div>
+        `).join('');
+        
+        div.innerHTML = `
+            <div class="order-header">
+                <div>
+                    <span class="order-id">Pedido #${order.numero_pedido}</span>
+                    <span class="order-time">${new Date(order.created_at).toLocaleString()}</span>
+                </div>
+                <span class="order-status ${statusClass}">${statusText}</span>
+            </div>
+            
+            <div class="customer-info">
+                <p><i class="fas fa-user"></i> <strong>Cliente:</strong> ${order.cliente_nome}</p>
+                <p><i class="fas fa-phone"></i> <strong>WhatsApp:</strong> ${order.cliente_telefone}</p>
+            </div>
+            
+            <div class="order-items">
+                ${itemsHtml}
+            </div>
+            
+            <div class="order-total">
+                Total: R$ ${parseFloat(order.total).toFixed(2)}
+            </div>
+            
+            <div class="order-actions" style="display: flex; gap: 10px; justify-content: space-between; margin-top: 15px;">
+                <div style="display: flex; gap: 5px;">
+                    <button class="action-btn status-btn pending-btn" onclick="atualizarStatusPedido(${order.id}, 'pending')" ${order.status === 'pending' ? 'disabled' : ''}>
+                        ⏳ Pendente
+                    </button>
+                    <button class="action-btn status-btn preparing-btn" onclick="atualizarStatusPedido(${order.id}, 'preparing')" ${order.status === 'preparing' ? 'disabled' : ''}>
+                        👨‍🍳 Preparando
+                    </button>
+                    <button class="action-btn status-btn delivered-btn" onclick="atualizarStatusPedido(${order.id}, 'delivered')" ${order.status === 'delivered' ? 'disabled' : ''}>
+                        ✅ Finalizado
+                    </button>
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button class="action-btn print-btn" onclick="printOrder(${order.id})">
+                        <i class="fas fa-print"></i>
+                    </button>
+                    <button class="action-btn delete-btn" onclick="excluirPedido(${order.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        ordersContainer.appendChild(div);
+    });
+}
+        
+        // Carrinho
+        function addToCart(item) {
+            const existing = cart.find(i => i.id === item.id);
+            
+            if (existing) {
+                existing.quantity++;
+            } else {
+                cart.push({ ...item, quantity: 1 });
+            }
+            
+            updateCart();
+            showToast(`${item.name} adicionado ao pedido!`, 'success');
+        }
+        
+        function removeFromCart(itemId) {
+            cart = cart.filter(item => item.id !== itemId);
+            updateCart();
+        }
+        
+        function updateQuantity(itemId, delta) {
+            const item = cart.find(i => i.id === itemId);
+            if (item) {
+                item.quantity += delta;
+                if (item.quantity <= 0) {
+                    removeFromCart(itemId);
+                } else {
+                    updateCart();
+                }
+            }
+        }
+        
+        function updateCart() {
+            const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCount.textContent = total;
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p style="text-align: center; color: #999;">Seu pedido está vazio</p>';
+                cartTotal.innerHTML = `
+                    <div class="cart-total-row">
+                        <span>Subtotal:</span>
+                        <span>R$ 0,00</span>
+                    </div>
+                    <div class="cart-total-row final">
+                        <span>Total:</span>
+                        <span>R$ 0,00</span>
+                    </div>
+                `;
+                checkoutBtn.disabled = true;
+                return;
+            }
+            
+            let subtotal = 0;
+            let itemsHtml = '';
+            
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal;
+                
+                itemsHtml += `
+                    <div class="cart-item">
+                        <img src="${item.image || 'https://via.placeholder.com/50x50'}" class="cart-item-image">
+                        <div class="cart-item-details">
+                            <h4>${item.name}</h4>
+                            <span class="cart-item-price">R$ ${item.price.toFixed(2)}</span>
+                        </div>
+                        <div class="cart-item-quantity">
+                            <button class="quantity-btn" onclick="updateQuantity(${item.id}, -1)">-</button>
+                            <span>${item.quantity}</span>
+                            <button class="quantity-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+                        </div>
+                        <span class="cart-item-total">R$ ${itemTotal.toFixed(2)}</span>
+                        <button class="remove-item-btn" onclick="removeFromCart(${item.id})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            
+            cartItems.innerHTML = itemsHtml;
+            cartTotal.innerHTML = `
+                <div class="cart-total-row">
+                    <span>Subtotal:</span>
+                    <span>R$ ${subtotal.toFixed(2)}</span>
+                </div>
+                <div class="cart-total-row final">
+                    <span>Total:</span>
+                    <span>R$ ${subtotal.toFixed(2)}</span>
+                </div>
+            `;
+            
+            checkoutBtn.disabled = false;
+        }
+        
+        // Checkout
+        checkoutForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!customerName.value || !customerPhone.value) {
+                showToast('Preencha nome e WhatsApp!', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/pedidos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        cliente_nome: customerName.value,
+                        cliente_telefone: customerPhone.value,
+                        items: cart
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showToast(`Pedido #${data.numero_pedido} realizado com sucesso!`, 'success');
+                    
+                    if (isLoggedIn) {
+                        unreadOrders++;
+                        adminNotification.textContent = unreadOrders;
+                        adminNotification.style.display = 'inline-block';
+                        
+                        modalBody.innerHTML = `
+                            <p><i class="fas fa-bell"></i> <strong>Novo pedido no clube!</strong></p>
+                            <p><strong>Cliente:</strong> ${customerName.value}</p>
+                            <p><strong>WhatsApp:</strong> ${customerPhone.value}</p>
+                            <p><strong>Total:</strong> R$ ${data.total.toFixed(2)}</p>
+                        `;
+                        alertModal.classList.add('active');
+                    }
+                    
+                    cart = [];
+                    updateCart();
+                    checkoutForm.reset();
+                    loadPedidos();
+                }
+            } catch (error) {
+                console.error('Erro no pedido:', error);
+            }
+        });
+        
+        // Admin - Itens
+        addItemBtn.addEventListener('click', () => {
+            editingItemId = null;
+            itemFormElement.reset();
+            imagePreview.classList.remove('active');
+            formTitle.textContent = 'Novo Item';
+            itemForm.classList.add('active');
+        });
+        
+        cancelBtn.addEventListener('click', () => {
+            itemForm.classList.remove('active');
+        });
+        
+        isSpecial.addEventListener('change', function() {
+            if (this.checked) {
+                specialPriceGroup.classList.add('active');
+            } else {
+                specialPriceGroup.classList.remove('active');
+            }
+        });
+        
+        itemImage.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    imagePreview.classList.add('active');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        itemFormElement.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('nome', itemName.value);
+            formData.append('categoria_id', itemCategory.value);
+            formData.append('preco', itemPrice.value);
+            formData.append('descricao', itemDescription.value);
+            formData.append('is_special', isSpecial.checked);
+            if (specialPrice.value) {
+                formData.append('preco_promocional', specialPrice.value);
+            }
+            if (itemImage.files[0]) {
+                formData.append('imagem', itemImage.files[0]);
+            }
+            
+            const url = editingItemId ? 
+                `${API_URL}/itens/${editingItemId}` : 
+                `${API_URL}/itens`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: editingItemId ? 'PUT' : 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    showToast(`Item ${editingItemId ? 'atualizado' : 'criado'} com sucesso!`, 'success');
+                    itemForm.classList.remove('active');
+                    await loadItens();
+                    renderAdminItems();
+                }
+            } catch (error) {
+                console.error('Erro ao salvar item:', error);
+            }
+        });
+        
+        function editItem(id) {
+            const item = menuItems.find(i => i.id === id);
+            if (!item) return;
+            
+            editingItemId = id;
+            itemName.value = item.name;
+            itemCategory.value = categorias.find(c => c.nome === item.category)?.id || '';
+            itemPrice.value = item.price;
+            itemDescription.value = item.description || '';
+            isSpecial.checked = item.isSpecial;
+            if (item.isSpecial) {
+                specialPriceGroup.classList.add('active');
+                specialPrice.value = item.specialPrice || '';
+            }
+            if (item.image) {
+                imagePreview.src = item.image;
+                imagePreview.classList.add('active');
+            }
+            
+            formTitle.textContent = 'Editar Item';
+            itemForm.classList.add('active');
+        }
+        
+        async function deleteItem(id) {
+            if (!confirm('Tem certeza que deseja excluir este item?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/itens/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    showToast('Item removido com sucesso!', 'success');
+                    await loadItens();
+                    renderAdminItems();
+                }
+            } catch (error) {
+                console.error('Erro ao deletar:', error);
+            }
+        }
+        
+        async function makeSpecial(id) {
+            const price = prompt('Digite o preço promocional:');
+            if (price && !isNaN(parseFloat(price)) && parseFloat(price) > 0) {
+                const item = menuItems.find(i => i.id === id);
+                if (item) {
+                    item.isSpecial = true;
+                    item.specialPrice = parseFloat(price);
+                    
+                    const formData = new FormData();
+                    formData.append('nome', item.name);
+                    formData.append('categoria_id', categorias.find(c => c.nome === item.category)?.id || '');
+                    formData.append('preco', item.price);
+                    formData.append('descricao', item.description || '');
+                    formData.append('is_special', 'true');
+                    formData.append('preco_promocional', price);
+                    
+                    await fetch(`${API_URL}/itens/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+                    
+                    await loadItens();
+                    renderAdminItems();
+                    showToast('Item adicionado aos pratos do dia!', 'success');
+                }
+            }
+        }
+        
+        async function removeSpecial(id) {
+            const item = menuItems.find(i => i.id === id);
+            if (item) {
+                item.isSpecial = false;
+                delete item.specialPrice;
+                
+                const formData = new FormData();
+                formData.append('nome', item.name);
+                formData.append('categoria_id', categorias.find(c => c.nome === item.category)?.id || '');
+                formData.append('preco', item.price);
+                formData.append('descricao', item.description || '');
+                formData.append('is_special', 'false');
+                
+                await fetch(`${API_URL}/itens/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                await loadItens();
+                renderAdminItems();
+                showToast('Item removido dos pratos do dia!', 'warning');
+            }
+        }
+        
+        // Tabs
+        adminTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                adminTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                itemsTab.classList.remove('active');
+                specialsTab.classList.remove('active');
+                ordersTab.classList.remove('active');
+                
+                if (tab.dataset.tab === 'items') {
+                    itemsTab.classList.add('active');
+                    renderAdminItems();
+                } else if (tab.dataset.tab === 'specials') {
+                    specialsTab.classList.add('active');
+                    renderSpecialsAdmin();
+                } else {
+                    ordersTab.classList.add('active');
+                    loadPedidos();
+                }
+            });
+        });
+        
+        // Categorias
+        categoryButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                categoryButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderMenuItems(btn.dataset.category);
+            });
+        });
+        
+        // Clear cart
+        clearCartBtn.addEventListener('click', () => {
+            if (cart.length > 0 && confirm('Limpar todo o pedido?')) {
+                cart = [];
+                updateCart();
+                showToast('Pedido limpo!', 'success');
+            }
+        });
+        
+        // Utils
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast-notification ${type}`;
+            toast.innerHTML = `${message}<button class="close-btn" onclick="this.parentElement.remove()">&times;</button>`;
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        function closeModal() {
+            alertModal.classList.remove('active');
+        }
+        
+        function viewOrders() {
+            closeModal();
+            showAdminPanel();
+            adminTabs.forEach(t => t.classList.remove('active'));
+            adminTabs[2].classList.add('active');
+            itemsTab.classList.remove('active');
+            specialsTab.classList.remove('active');
+            ordersTab.classList.add('active');
+            loadPedidos();
+        }
+        
+        function printOrder(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Pedido #${order.numero_pedido} - Nosso Clube</title>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            padding: 20px;
+                            max-width: 800px;
+                            margin: 0 auto;
+                        }
+                        h1 { 
+                            color: #8e44ad; 
+                            text-align: center;
+                            border-bottom: 2px solid #8e44ad;
+                            padding-bottom: 10px;
+                        }
+                        .header { 
+                            text-align: center; 
+                            margin-bottom: 30px;
+                            color: #2c3e50;
+                        }
+                        .info { 
+                            margin: 20px 0; 
+                            padding: 15px;
+                            background: #f9f9f9;
+                            border-radius: 5px;
+                        }
+                        table { 
+                            width: 100%; 
+                            border-collapse: collapse; 
+                            margin: 20px 0;
+                        }
+                        th { 
+                            background: #8e44ad;
+                            color: white;
+                            padding: 10px;
+                        }
+                        td { 
+                            padding: 10px; 
+                            text-align: left; 
+                            border-bottom: 1px solid #ddd;
+                        }
+                        .total { 
+                            font-size: 1.3rem;
+                            font-weight: bold; 
+                            text-align: right; 
+                            margin-top: 20px;
+                            color: #8e44ad;
+                        }
+                        .footer { 
+                            text-align: center; 
+                            margin-top: 30px; 
+                            color: #666;
+                            font-size: 0.9rem;
+                        }
+                        .club-name {
+                            color: #8e44ad;
+                            font-weight: bold;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>🍽️ Nosso Clube</h1>
+                    <div class="header">
+                        <h2>Comprovante de Pedido #${order.numero_pedido}</h2>
+                    </div>
+                    
+                    <div class="info">
+                        <p><strong>Data:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+                        <p><strong>Cliente:</strong> ${order.cliente_nome}</p>
+                        <p><strong>WhatsApp:</strong> ${order.cliente_telefone}</p>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Qtd</th>
+                                <th>Preço</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${(order.itens || []).map(item => `
+                                <tr>
+                                    <td>Item #${item.item_id}</td>
+                                    <td>${item.quantidade}</td>
+                                    <td>R$ ${parseFloat(item.preco_unitario).toFixed(2)}</td>
+                                    <td>R$ ${parseFloat(item.subtotal).toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    
+                    <div class="total">
+                        Total do Pedido: R$ ${parseFloat(order.total).toFixed(2)}
+                    </div>
+                    
+                    <div class="footer">
+                        <p class="club-name">Nosso Clube</p>
+                        <p>Obrigado pela preferência!</p>
+                        <p>Volte sempre 🍽️</p>
+                    </div>
+                    
+                    <script>
+                        window.onload = () => window.print();
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+        
+        // Expor funções globais
+        window.addToCart = addToCart;
+        window.removeFromCart = removeFromCart;
+        window.updateQuantity = updateQuantity;
+        window.editItem = editItem;
+        window.deleteItem = deleteItem;
+        window.makeSpecial = makeSpecial;
+        window.removeSpecial = removeSpecial;
+        window.printOrder = printOrder;
+        window.closeModal = closeModal;
+        window.viewOrders = viewOrders;
+        
+        // Iniciar
+        init();
+        // ============================================
+// FUNÇÕES PARA GERENCIAR STATUS DOS PEDIDOS
+// ============================================
+
+// Atualizar status de um pedido
+async function atualizarStatusPedido(pedidoId, novoStatus) {
+    try {
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch(`${API_URL}/pedidos/${pedidoId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ status: novoStatus })
+        });
+        
+        if (response.ok) {
+            // Atualizar o status na lista local
+            const pedido = orders.find(p => p.id === pedidoId);
+            if (pedido) {
+                pedido.status = novoStatus;
+            }
+            
+            renderOrders();
+            
+            let mensagem = '';
+            switch(novoStatus) {
+                case 'pending':
+                    mensagem = 'Pedido marcado como Pendente';
+                    break;
+                case 'preparing':
+                    mensagem = 'Pedido em preparo! 👨‍🍳';
+                    break;
+                case 'delivered':
+                    mensagem = 'Pedido finalizado! ✅';
+                    break;
+            }
+            
+            showToast(mensagem, 'success');
+        } else {
+            const erro = await response.text();
+            showToast('Erro ao atualizar status: ' + erro, 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar status:', error);
+        showToast('Erro ao atualizar status', 'error');
+    }
+}
+
+// Excluir um pedido específico
+async function excluirPedido(pedidoId) {
+    if (!confirm('Tem certeza que deseja excluir este pedido?')) {
+        return;
+    }
+    
+    try {
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch(`${API_URL}/pedidos/${pedidoId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (response.ok) {
+            // Remover da lista local
+            orders = orders.filter(p => p.id !== pedidoId);
+            renderOrders();
+            showToast('Pedido excluído com sucesso!', 'success');
+        } else {
+            const erro = await response.text();
+            showToast('Erro ao excluir pedido: ' + erro, 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao excluir pedido:', error);
+        showToast('Erro ao excluir pedido', 'error');
+    }
+}
+
+// Função melhorada para notificação de novo pedido
+function mostrarAlertaNovoPedido(pedido) {
+    // Criar overlay do modal
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'modal-overlay';
+    modalOverlay.style.display = 'flex';
+    modalOverlay.id = 'alertaNovoPedido';
+    
+    // Criar conteúdo do modal
+    const modalContent = document.createElement('div');
+    modalContent.className = 'modal-content';
+    modalContent.style.maxWidth = '450px';
+    modalContent.style.animation = 'pulse 0.5s';
+    
+    const itensResumo = pedido.items.slice(0, 3).map(item => 
+        `${item.quantity}x ${item.name}`
+    ).join(', ');
+    
+    const maisItens = pedido.items.length > 3 ? `<br>... e mais ${pedido.items.length - 3} itens` : '';
+    
+    modalContent.innerHTML = `
+        <div class="modal-header" style="background: linear-gradient(135deg, var(--club-color), #6c3483); color: white; margin: -2rem -2rem 1rem -2rem; padding: 1.5rem; border-radius: 10px 10px 0 0;">
+            <h3 style="display: flex; align-items: center; gap: 10px; margin: 0;">
+                <i class="fas fa-bell" style="font-size: 24px; animation: ring 1s infinite;"></i>
+                🔔 NOVO PEDIDO!
+            </h3>
+            <button class="modal-close" onclick="fecharAlerta()" style="color: white;">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <span style="font-size: 48px;">🛵</span>
+                <h2 style="color: var(--club-color); margin: 10px 0;">Pedido #${pedido.numero_pedido}</h2>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <p><i class="fas fa-user" style="color: var(--club-color);"></i> <strong>Cliente:</strong> ${pedido.customerName}</p>
+                <p><i class="fas fa-phone" style="color: var(--club-color);"></i> <strong>WhatsApp:</strong> ${pedido.customerPhone}</p>
+                <p><i class="fas fa-shopping-bag" style="color: var(--club-color);"></i> <strong>Itens:</strong> ${itensResumo} ${maisItens}</p>
+                <p style="font-size: 24px; font-weight: bold; color: var(--warning-color); margin: 15px 0 0 0;">
+                    Total: R$ ${pedido.total.toFixed(2)}
+                </p>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" style="flex: 2; background: var(--success-color);" onclick="verPedidoAgora(${pedido.id})">
+                    <i class="fas fa-eye"></i> Ver Pedido Agora
+                </button>
+                <button class="btn btn-secondary" style="flex: 1;" onclick="fecharAlerta()">
+                    <i class="fas fa-clock"></i> Depois
+                </button>
+            </div>
+        </div>
+    `;
+    
+    modalOverlay.appendChild(modalContent);
+    document.body.appendChild(modalOverlay);
+    
+    // Tocar som de notificação (se o navegador permitir)
+    try {
+        const audio = new Audio('data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4GmmQQUeqbC6d0IoAAAAAAAAAAAAAAAAAAAAAAD+4NgBAAAABkf///9/AAAAAgD/AAAAUAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//sQxAADwAABQAAAACQAAAgAA//sQxAADwAABQAAAACQAAAgAA');
+        audio.play();
+    } catch (e) {
+        console.log('Áudio não suportado');
+    }
+}
+
+// Fechar alerta
+function fecharAlerta() {
+    const modal = document.getElementById('alertaNovoPedido');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Função checkout modificada para usar o novo alerta
+const checkoutOriginal = checkout;
+checkout = async function(e) {
+    e.preventDefault();
+    
+    if (cart.length === 0) {
+        showToast('Carrinho vazio!', 'error');
+        return;
+    }
+    
+    const customerName = customerNameInput.value.trim();
+    const customerPhone = customerPhoneInput.value.trim();
+    
+    if (!customerName || !customerPhone) {
+        showToast('Preencha nome e WhatsApp!', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_URL}/pedidos`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                cliente_nome: customerName,
+                cliente_telefone: customerPhone,
+                items: cart
+            })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Buscar o pedido completo do backend
+            const pedidoResponse = await fetch(`${API_URL}/pedidos?numero=${data.numero_pedido}`);
+            const pedidosData = await pedidoResponse.json();
+            const novoPedido = pedidosData[0] || {
+                id: data.id || Date.now(),
+                numero_pedido: data.numero_pedido,
+                customerName: customerName,
+                customerPhone: customerPhone,
+                items: [...cart],
+                total: data.total,
+                status: 'pending',
+                created_at: new Date().toISOString()
+            };
+            
+            orders.unshift(novoPedido);
+            
+            // MOSTRAR ALERTA BONITO
+            mostrarAlertaNovoPedido({
+                id: novoPedido.id,
+                numero_pedido: novoPedido.numero_pedido,
+                customerName: customerName,
+                customerPhone: customerPhone,
+                items: [...cart],
+                total: data.total
+            });
+            
+            // Atualizar contador de notificações
+            unreadOrders++;
+            updateAdminNotification();
+            
+            showToast(`Pedido #${data.numero_pedido} realizado!`, 'success');
+            
+            // Limpar carrinho
+            cart = [];
+            updateCart();
+            checkoutForm.reset();
+            
+            // Se admin estiver logado, atualizar lista
+            if (isLoggedIn) {
+                renderOrders();
+            }
+        }
+    } catch (error) {
+        console.error('Erro no pedido:', error);
+        showToast('Erro ao processar pedido', 'error');
+    }
+};
+    </script>
+</body>
+</html>
