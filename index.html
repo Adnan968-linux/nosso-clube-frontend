@@ -1427,7 +1427,7 @@
         }
 
         // ========== FUNÇÕES DE RENDERIZAÇÃO ==========
-       function renderMenuItems(categoria = 'all') {
+             function renderMenuItems(categoria = 'all') {
     menuGrid.innerHTML = '';
     
     let filtered = [];
@@ -1449,15 +1449,27 @@
         const isSpecial = item.isSpecial;
         const displayPrice = isSpecial ? (item.specialPrice || precoNumerico * 0.8) : precoNumerico;
         
-        // CORREÇÃO: Verificar se a imagem já é uma URL completa
-        let imagemUrl = item.image || 'https://picsum.photos/300/200?random=' + item.id;
+        // CORREÇÃO DEFINITIVA: Tratar URL da imagem
+        let imagemUrl = '';
         
-        // IMPORTANTE: Se a imagem começa com http, usar direto, sem concatenar com o backend
-        if (imagemUrl.startsWith('http')) {
-            // Já é URL completa, manter como está
+        if (item.image) {
+            // Se a imagem começa com http, usar direto (URL externa)
+            if (item.image.startsWith('http')) {
+                imagemUrl = item.image;
+                console.log('✅ Usando URL externa:', imagemUrl);
+            } 
+            // Se começa com /uploads, concatenar com backend
+            else if (item.image.startsWith('/uploads')) {
+                imagemUrl = 'https://nosso-clube-api.onrender.com' + item.image;
+                console.log('📦 Usando upload local:', imagemUrl);
+            }
+            // Outro caso, usar como está
+            else {
+                imagemUrl = item.image;
+            }
         } else {
-            // É caminho relativo, concatenar com backend
-            imagemUrl = API_URL.replace('/api', '') + imagemUrl;
+            // Sem imagem, usar placeholder
+            imagemUrl = 'https://picsum.photos/300/200?random=' + item.id;
         }
         
         const card = document.createElement('div');
@@ -1496,7 +1508,6 @@
         menuGrid.appendChild(card);
     });
 }
-
         function renderSpecialsSection() {
             const specials = menuItems.filter(item => item.isSpecial);
             specialsGrid.innerHTML = '';
@@ -1540,7 +1551,7 @@
             });
         }
 
-         function renderAdminItems() {
+            function renderAdminItems() {
     adminItemsContainer.innerHTML = '';
     
     if (menuItems.length === 0) {
@@ -1549,13 +1560,19 @@
     }
     
     menuItems.forEach(item => {
-        // CORREÇÃO: Mesma lógica para URLs de imagem
-        let imagemUrl = item.image || 'https://picsum.photos/80/80?random=' + item.id;
+        // CORREÇÃO DEFINITIVA: Mesma lógica para URLs
+        let imagemUrl = '';
         
-        if (imagemUrl.startsWith('http')) {
-            // URL completa, manter como está
+        if (item.image) {
+            if (item.image.startsWith('http')) {
+                imagemUrl = item.image;
+            } else if (item.image.startsWith('/uploads')) {
+                imagemUrl = 'https://nosso-clube-api.onrender.com' + item.image;
+            } else {
+                imagemUrl = item.image;
+            }
         } else {
-            imagemUrl = API_URL.replace('/api', '') + imagemUrl;
+            imagemUrl = 'https://picsum.photos/80/80?random=' + item.id;
         }
         
         const div = document.createElement('div');
