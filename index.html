@@ -938,6 +938,97 @@
             padding: 1.5rem 0;
             margin-top: 2rem;
         }
+        /* Estilos para status dos pedidos */
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-preparing {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.status-delivered {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+/* Botões de status */
+.status-btn {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.pending-btn {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.pending-btn:hover:not(:disabled) {
+    background-color: #ffe69c;
+}
+
+.preparing-btn {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.preparing-btn:hover:not(:disabled) {
+    background-color: #9fc9ff;
+}
+
+.delivered-btn {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.delivered-btn:hover:not(:disabled) {
+    background-color: #a3d9b1;
+}
+
+.status-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Botão imprimir */
+.print-btn {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.print-btn:hover {
+    background-color: #1a2634;
+}
+
+/* Notificações melhoradas */
+.toast-notification {
+    position: relative;
+    padding: 20px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    animation: slideIn 0.3s ease-out;
+    max-width: 350px;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
     </style>
 </head>
 <body>
@@ -1444,33 +1535,256 @@
             });
         }
 
-        function renderOrders() {
-            ordersContainer.innerHTML = '';
+       
             
-            if (orders.length === 0) {
-                ordersContainer.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum pedido</p>';
-                return;
+            function renderOrders() {
+    ordersContainer.innerHTML = '';
+    
+    if (orders.length === 0) {
+        ordersContainer.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum pedido recebido</p>';
+        return;
+    }
+    
+    orders.forEach(order => {
+        const div = document.createElement('div');
+        div.className = 'order-card';
+        div.setAttribute('data-pedido-id', order.id);
+        
+        // Determinar a classe de status
+        let statusClass = '';
+        let statusText = '';
+        
+        switch(order.status) {
+            case 'pending':
+                statusClass = 'status-pending';
+                statusText = '⏳ Pendente';
+                break;
+            case 'preparing':
+                statusClass = 'status-preparing';
+                statusText = '👨‍🍳 Preparando';
+                break;
+            case 'delivered':
+                statusClass = 'status-delivered';
+                statusText = '✅ Finalizado';
+                break;
+            default:
+                statusClass = 'status-pending';
+                statusText = '⏳ Pendente';
+        }
+        
+        // Formatar itens do pedido
+        const itemsHtml = order.itens && order.itens.length > 0 
+            ? order.itens.map(item => `
+                <div class="order-item-row">
+                    <span>${item.quantidade || 1}x ${item.nome || `Item #${item.item_id}`}</span>
+                    <span>R$ ${parseFloat(item.subtotal || item.preco_unitario * (item.quantidade || 1)).toFixed(2)}</span>
+                </div>
+            `).join('')
+            : '<p>Itens não disponíveis</p>';
+        
+        div.innerHTML = `
+            <div class="order-header">
+                <div>
+                    <span class="order-id">Pedido #${order.numero_pedido || order.id}</span>
+                    <span class="order-time">${order.created_at ? new Date(order.created_at).toLocaleString() : 'Agora mesmo'}</span>
+                </div>
+                <span class="order-status ${statusClass}">${statusText}</span>
+            </div>
+            
+            <div class="customer-info">
+                <p><i class="fas fa-user"></i> <strong>Cliente:</strong> ${order.cliente_nome || 'Cliente'}</p>
+                <p><i class="fas fa-phone"></i> <strong>WhatsApp:</strong> ${order.cliente_telefone || '---'}</p>
+            </div>
+            
+            <div class="order-items">
+                <h4>Itens do Pedido:</h4>
+                ${itemsHtml}
+            </div>
+            
+            <div class="order-total">
+                Total: R$ ${parseFloat(order.total || 0).toFixed(2)}
+            </div>
+            
+            <div class="order-actions" style="display: flex; gap: 10px; justify-content: space-between; margin-top: 15px; flex-wrap: wrap;">
+                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                    <button class="action-btn status-btn pending-btn" onclick="atualizarStatusPedido(${order.id}, 'pending')" ${order.status === 'pending' ? 'disabled' : ''}>
+                        ⏳ Pendente
+                    </button>
+                    <button class="action-btn status-btn preparing-btn" onclick="atualizarStatusPedido(${order.id}, 'preparing')" ${order.status === 'preparing' ? 'disabled' : ''}>
+                        👨‍🍳 Preparando
+                    </button>
+                    <button class="action-btn status-btn delivered-btn" onclick="atualizarStatusPedido(${order.id}, 'delivered')" ${order.status === 'delivered' ? 'disabled' : ''}>
+                        ✅ Finalizado
+                    </button>
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button class="action-btn print-btn" onclick="printOrder(${order.id})">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <button class="action-btn delete-btn" onclick="excluirPedido(${order.id})">
+                        <i class="fas fa-trash"></i> Excluir
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        ordersContainer.appendChild(div);
+    });
+}
+// ============================================
+// FUNÇÕES PARA GERENCIAR PEDIDOS
+// ============================================
+
+// Atualizar status de um pedido
+window.atualizarStatusPedido = async function(pedidoId, novoStatus) {
+    try {
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch(`${API_URL}/pedidos/${pedidoId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ status: novoStatus })
+        });
+        
+        if (response.ok) {
+            // Atualizar o status na lista local
+            const pedido = orders.find(p => p.id === pedidoId);
+            if (pedido) {
+                pedido.status = novoStatus;
             }
             
-            orders.forEach(order => {
-                const div = document.createElement('div');
-                div.className = 'order-card';
-                div.innerHTML = `
-                    <div class="order-header">
-                        <span class="order-id">Pedido #${order.numero_pedido || order.id}</span>
-                        <span class="order-status">${order.status || 'Pendente'}</span>
-                    </div>
-                    <div class="customer-info">
-                        <p><strong>Cliente:</strong> ${order.cliente_nome || 'Cliente'}</p>
-                        <p><strong>Telefone:</strong> ${order.cliente_telefone || '---'}</p>
-                    </div>
-                    <div class="order-total">
-                        Total: R$ ${parseFloat(order.total || 0).toFixed(2)}
-                    </div>
-                `;
-                ordersContainer.appendChild(div);
-            });
+            renderOrders();
+            
+            let mensagem = '';
+            switch(novoStatus) {
+                case 'pending':
+                    mensagem = 'Pedido marcado como Pendente';
+                    break;
+                case 'preparing':
+                    mensagem = 'Pedido em preparo! 👨‍🍳';
+                    break;
+                case 'delivered':
+                    mensagem = 'Pedido finalizado! ✅';
+                    break;
+            }
+            
+            showToast(mensagem, 'success');
+        } else {
+            const erro = await response.text();
+            showToast('Erro ao atualizar status: ' + erro, 'error');
         }
+    } catch (error) {
+        console.error('Erro ao atualizar status:', error);
+        showToast('Erro ao atualizar status', 'error');
+    }
+};
+
+// Excluir um pedido específico
+window.excluirPedido = async function(pedidoId) {
+    if (!confirm('Tem certeza que deseja excluir este pedido?')) {
+        return;
+    }
+    
+    try {
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch(`${API_URL}/pedidos/${pedidoId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (response.ok) {
+            // Remover da lista local
+            orders = orders.filter(p => p.id !== pedidoId);
+            renderOrders();
+            showToast('Pedido excluído com sucesso!', 'success');
+        } else {
+            const erro = await response.text();
+            showToast('Erro ao excluir pedido: ' + erro, 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao excluir pedido:', error);
+        showToast('Erro ao excluir pedido', 'error');
+    }
+};
+
+// Função para imprimir pedido
+window.printOrder = function(orderId) {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    const printWindow = window.open('', '_blank');
+    
+    const itemsHtml = order.itens && order.itens.length > 0
+        ? order.itens.map(item => `
+            <tr>
+                <td>${item.nome || `Item #${item.item_id}`}</td>
+                <td>${item.quantidade || 1}</td>
+                <td>R$ ${parseFloat(item.preco_unitario || 0).toFixed(2)}</td>
+                <td>R$ ${parseFloat(item.subtotal || item.preco_unitario * (item.quantidade || 1)).toFixed(2)}</td>
+            </tr>
+        `).join('')
+        : '<tr><td colspan="4">Itens não disponíveis</td></tr>';
+    
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Pedido #${order.numero_pedido || order.id}</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h1 { color: #8e44ad; text-align: center; }
+                .info { margin: 20px 0; padding: 10px; background: #f5f5f5; border-radius: 5px; }
+                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                th { background: #8e44ad; color: white; padding: 10px; }
+                td { padding: 10px; border-bottom: 1px solid #ddd; }
+                .total { font-size: 1.2rem; font-weight: bold; text-align: right; margin-top: 20px; }
+                .footer { text-align: center; margin-top: 30px; color: #666; }
+            </style>
+        </head>
+        <body>
+            <h1>Nosso Clube</h1>
+            <h2>Pedido #${order.numero_pedido || order.id}</h2>
+            
+            <div class="info">
+                <p><strong>Cliente:</strong> ${order.cliente_nome || 'Cliente'}</p>
+                <p><strong>WhatsApp:</strong> ${order.cliente_telefone || '---'}</p>
+                <p><strong>Data:</strong> ${order.created_at ? new Date(order.created_at).toLocaleString() : 'Agora mesmo'}</p>
+                <p><strong>Status:</strong> ${order.status || 'Pendente'}</p>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Qtd</th>
+                        <th>Preço</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itemsHtml}
+                </tbody>
+            </table>
+            
+            <div class="total">
+                Total: R$ ${parseFloat(order.total || 0).toFixed(2)}
+            </div>
+            
+            <div class="footer">
+                <p>Obrigado pela preferência!</p>
+            </div>
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.print();
+};
 
         // Cart functions
         window.addToCart = function(item) {
@@ -1549,43 +1863,83 @@
             checkoutBtn.disabled = false;
         }
 
-        // Checkout
-        async function checkout(e) {
-            e.preventDefault();
+       ] // Checkout
+      // Checkout com notificação
+async function checkout(e) {
+    e.preventDefault();
+    
+    if (!customerName.value || !customerPhone.value) {
+        showToast('Preencha nome e WhatsApp!', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_URL}/pedidos`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cliente_nome: customerName.value,
+                cliente_telefone: customerPhone.value,
+                items: cart.map(item => ({
+                    id: item.id,
+                    quantity: item.quantity,
+                    price: item.price,
+                    name: item.name
+                }))
+            })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
             
-            if (!customerName.value || !customerPhone.value) {
-                showToast('Preencha nome e WhatsApp!', 'error');
-                return;
-            }
+            // Criar objeto do novo pedido
+            const novoPedido = {
+                id: Date.now(),
+                numero_pedido: data.numero_pedido,
+                cliente_nome: customerName.value,
+                cliente_telefone: customerPhone.value,
+                total: data.total,
+                status: 'pending',
+                created_at: new Date().toISOString(),
+                itens: cart.map(item => ({
+                    nome: item.name,
+                    quantidade: item.quantity,
+                    preco_unitario: item.price,
+                    subtotal: item.price * item.quantity
+                }))
+            };
             
-            try {
-                const response = await fetch(`${API_URL}/pedidos`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        cliente_nome: customerName.value,
-                        cliente_telefone: customerPhone.value,
-                        items: cart.map(item => ({
-                            id: item.id,
-                            quantity: item.quantity,
-                            price: item.price
-                        }))
-                    })
-                });
+            // Adicionar à lista de pedidos
+            orders.unshift(novoPedido);
+            
+            // NOTIFICAÇÃO PARA O ADMIN
+            if (isLoggedIn) {
+                // Se o admin estiver logado, mostra notificação
+                mostrarNotificacaoPedido(novoPedido);
                 
-                if (response.ok) {
-                    showToast('Pedido realizado!', 'success');
-                    cart = [];
-                    updateCart();
-                    checkoutForm.reset();
-                } else {
-                    showToast('Erro no pedido', 'error');
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-                showToast('Erro de conexão', 'error');
+                // Atualiza a lista de pedidos no admin
+                renderOrders();
             }
+            
+            // Incrementar contador de notificações
+            unreadOrders++;
+            
+            showToast(`Pedido #${data.numero_pedido} realizado!`, 'success');
+            
+            // Limpar carrinho
+            cart = [];
+            updateCart();
+            checkoutForm.reset();
+            
+        } else {
+            const error = await response.text();
+            showToast('Erro no pedido: ' + error, 'error');
         }
+    } catch (error) {
+        console.error('Erro:', error);
+        showToast('Erro de conexão', 'error');
+    }
+}
 
         // Login
         async function handleLoginSubmit(e) {
@@ -1831,6 +2185,82 @@
 
         // Start
         init();
+        // Função para mostrar notificação de novo pedido
+function mostrarNotificacaoPedido(pedido) {
+    // Criar elemento de notificação
+    const notificacao = document.createElement('div');
+    notificacao.className = 'toast-notification';
+    notificacao.style.backgroundColor = '#8e44ad';
+    notificacao.style.borderLeft = '5px solid #f39c12';
+    
+    const itensResumo = pedido.itens.slice(0, 2).map(item => 
+        `${item.quantidade}x ${item.nome}`
+    ).join(', ');
+    
+    const maisItens = pedido.itens.length > 2 ? ` e mais ${pedido.itens.length - 2} itens` : '';
+    
+    notificacao.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <i class="fas fa-bell" style="font-size: 24px;"></i>
+            <strong style="font-size: 16px;">🛵 NOVO PEDIDO!</strong>
+        </div>
+        <p><strong>Pedido #${pedido.numero_pedido}</strong></p>
+        <p><i class="fas fa-user"></i> ${pedido.cliente_nome}</p>
+        <p><i class="fas fa-phone"></i> ${pedido.cliente_telefone}</p>
+        <p><i class="fas fa-shopping-bag"></i> ${itensResumo}${maisItens}</p>
+        <p style="font-size: 18px; font-weight: bold; margin: 10px 0;">Total: R$ ${pedido.total.toFixed(2)}</p>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn btn-primary" style="flex: 1;" onclick="verPedidoAgora(${pedido.id})">
+                Ver Pedido
+            </button>
+            <button class="btn btn-secondary" style="flex: 0;" onclick="this.parentElement.parentElement.remove()">
+                Fechar
+            </button>
+        </div>
+        <button class="close-btn" style="position: absolute; top: 5px; right: 10px;" onclick="this.parentElement.remove()">&times;</button>
+    `;
+    
+    toastContainer.appendChild(notificacao);
+    
+    // Remover automaticamente após 10 segundos
+    setTimeout(() => {
+        if (notificacao.parentElement) {
+            notificacao.remove();
+        }
+    }, 10000);
+}
+
+// Função para ver pedido quando clicar na notificação
+window.verPedidoAgora = function(pedidoId) {
+    // Fechar todas as notificações
+    document.querySelectorAll('.toast-notification').forEach(n => n.remove());
+    
+    // Abrir painel admin se não estiver
+    if (!isAdminMode) {
+        showAdminPanel();
+    }
+    
+    // Ir para a aba de pedidos
+    adminTabs.forEach(t => t.classList.remove('active'));
+    adminTabs[2].classList.add('active');
+    itemsTab.classList.remove('active');
+    specialsTab.classList.remove('active');
+    ordersTab.classList.add('active');
+    
+    // Destacar o pedido
+    setTimeout(() => {
+        const pedidoElement = document.querySelector(`[data-pedido-id="${pedidoId}"]`);
+        if (pedidoElement) {
+            pedidoElement.style.backgroundColor = '#fff3cd';
+            pedidoElement.style.transition = 'background-color 1s';
+            pedidoElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            setTimeout(() => {
+                pedidoElement.style.backgroundColor = '';
+            }, 2000);
+        }
+    }, 500);
+};
     </script>
 </body>
 </html>
