@@ -1430,19 +1430,28 @@
    function renderMenuItems(categoria = 'all') {
     menuGrid.innerHTML = '';
     
-    let filtered = [];
-    if (categoria === 'specials') {
-        filtered = menuItems.filter(item => item.isSpecial);
-    } else if (categoria === 'all') {
-        filtered = menuItems;
+    // ========== LÓGICA CORRIGIDA PARA A URL DA IMAGEM ==========
+let imagemUrl = '';
+
+if (item.image) {
+    // Limpa qualquer concatenação errada que possa ter vindo do banco
+    let imagemLimpa = item.image.replace(/^https?:\/\/[^\/]+https?:\/\//, 'https://');
+
+    // Se a URL limpa começa com http, usa ela diretamente
+    if (imagemLimpa.startsWith('http')) {
+        imagemUrl = imagemLimpa;
+        console.log('✅ URL Externa Corrigida:', imagemUrl);
+    } else if (imagemLimpa.startsWith('/uploads')) {
+        // Apenas para referência, mas não vai funcionar no Render
+        imagemUrl = 'https://nosso-clube-api.onrender.com' + imagemLimpa;
+        console.warn('⚠️ Upload local (pode falhar):', imagemUrl);
     } else {
-        filtered = menuItems.filter(item => item.category === categoria);
+        imagemUrl = 'https://picsum.photos/300/200?random=' + item.id;
     }
-    
-    if (filtered.length === 0) {
-        menuGrid.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum item encontrado</p>';
-        return;
-    }
+} else {
+    imagemUrl = 'https://picsum.photos/300/200?random=' + item.id;
+}
+// ========== FIM DA CORREÇÃO ==========
     
     filtered.forEach(item => {
         const precoNumerico = parseFloat(item.price) || 0;
