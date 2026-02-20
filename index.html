@@ -6,7 +6,7 @@
     <title>Nosso Clube - Cardápio Digital</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
+      :root {
             --primary-color: #d35400;
             --secondary-color: #2c3e50;
             --light-color: #f9f9f9;
@@ -1337,7 +1337,9 @@
                 
                 card.innerHTML = `
                     ${isSpecial ? '<span class="special-badge"><i class="fas fa-star"></i> PRATO DO DIA</span>' : ''}
-                    <img src="${item.image || 'https://via.placeholder.com/300x200'}" class="item-image" onerror="this.src='https://via.placeholder.com/300x200'">
+                    <img src="${item.image || 'https://picsum.photos/300/200?random=' + item.id}" 
+                         class="item-image" 
+                         onerror="this.src='https://picsum.photos/300/200?random=1'">
                     <div class="item-details">
                         <div class="item-header">
                             <h3 class="item-name">${item.name}</h3>
@@ -1356,7 +1358,7 @@
                                 price: displayPrice,
                                 originalPrice: precoNumerico,
                                 image: item.image
-                            })})">
+                            }).replace(/"/g, '&quot;')})">
                                 <i class="fas fa-cart-plus"></i> Add
                             </button>
                         </div>
@@ -1383,7 +1385,9 @@
                 const card = document.createElement('div');
                 card.className = 'special-item';
                 card.innerHTML = `
-                    <img src="${item.image || 'https://via.placeholder.com/80x80'}" class="special-image" onerror="this.src='https://via.placeholder.com/80x80'">
+                    <img src="${item.image || 'https://picsum.photos/80/80?random=' + item.id}" 
+                         class="special-image" 
+                         onerror="this.src='https://picsum.photos/80/80?random=1'">
                     <div>
                         <span class="special-tag"><i class="fas fa-star"></i> EXCLUSIVO</span>
                         <h3>${item.name}</h3>
@@ -1392,13 +1396,13 @@
                             <span class="original-price">R$ ${precoOriginal.toFixed(2)}</span>
                             <span class="discount-price">R$ ${precoPromo.toFixed(2)}</span>
                         </div>
-                        <button class="add-to-cart-btn" onclick='addToCart(${JSON.stringify({
+                        <button class="add-to-cart-btn" onclick="addToCart(${JSON.stringify({
                             id: item.id,
                             name: item.name,
                             price: precoPromo,
                             originalPrice: precoOriginal,
                             image: item.image
-                        })})'>
+                        }).replace(/"/g, '&quot;')})">
                             <i class="fas fa-cart-plus"></i> Adicionar
                         </button>
                     </div>
@@ -1420,7 +1424,9 @@
                 const div = document.createElement('div');
                 div.className = 'admin-item';
                 div.innerHTML = `
-                    <img src="${item.image || 'https://via.placeholder.com/80x80'}" class="admin-item-image">
+                    <img src="${item.image || 'https://picsum.photos/80/80?random=' + item.id}" 
+                         class="admin-item-image"
+                         onerror="this.src='https://picsum.photos/80/80?random=1'">
                     <div>
                         <h4>${item.name}</h4>
                         <p>R$ ${parseFloat(item.price).toFixed(2)}</p>
@@ -1517,7 +1523,9 @@
                 subtotal += itemTotal;
                 itemsHtml += `
                     <div class="cart-item">
-                        <img src="${item.image || 'https://via.placeholder.com/50x50'}" class="cart-item-image">
+                        <img src="${item.image || 'https://picsum.photos/50/50?random=' + item.id}" 
+                             class="cart-item-image"
+                             onerror="this.src='https://picsum.photos/50/50?random=1'">
                         <div>
                             <h4>${item.name}</h4>
                             <span>R$ ${item.price.toFixed(2)}</span>
@@ -1735,6 +1743,7 @@
                         renderAdminItems();
                     } else if (tab.dataset.tab === 'specials') {
                         specialsTab.classList.add('active');
+                        renderSpecialsAdmin();
                     } else {
                         ordersTab.classList.add('active');
                         loadPedidos();
@@ -1748,6 +1757,14 @@
                 imagePreview.classList.remove('active');
                 formTitle.textContent = 'Novo Item';
                 itemForm.classList.add('active');
+            });
+            
+            logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('token');
+                token = null;
+                isLoggedIn = false;
+                showMenuView();
+                showToast('Logout realizado!');
             });
             
             cancelBtn.addEventListener('click', () => {
@@ -1776,6 +1793,29 @@
             
             itemFormElement.addEventListener('submit', handleItemSubmit);
             loginForm.addEventListener('submit', handleLoginSubmit);
+        }
+
+        // Render specials admin
+        function renderSpecialsAdmin() {
+            specialsAdminContainer.innerHTML = '';
+            const specials = menuItems.filter(item => item.isSpecial);
+            
+            if (specials.length === 0) {
+                specialsAdminContainer.innerHTML = '<p>Nenhum item especial</p>';
+                return;
+            }
+            
+            specials.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'admin-item';
+                div.innerHTML = `
+                    <div>
+                        <h4>${item.name}</h4>
+                        <p>Promoção: R$ ${(item.specialPrice || item.price * 0.8).toFixed(2)}</p>
+                    </div>
+                `;
+                specialsAdminContainer.appendChild(div);
+            });
         }
 
         // Initialize
