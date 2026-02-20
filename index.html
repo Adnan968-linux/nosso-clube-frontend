@@ -6,7 +6,6 @@
     <title>Nosso Clube - Cardápio Digital</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Seu CSS existente permanece o mesmo */
         :root {
             --primary-color: #d35400;
             --secondary-color: #2c3e50;
@@ -37,7 +36,6 @@
             padding: 0 15px;
         }
         
-        /* Header */
         header {
             background: linear-gradient(135deg, var(--secondary-color), var(--club-color));
             color: white;
@@ -125,7 +123,6 @@
             margin-left: 5px;
         }
         
-        /* Main content */
         main {
             padding: 2rem 0;
             min-height: calc(100vh - 160px);
@@ -150,7 +147,6 @@
             background: linear-gradient(90deg, var(--primary-color), var(--club-color));
         }
         
-        /* Pratos do Dia */
         .daily-specials {
             background: linear-gradient(135deg, var(--secondary-color), var(--club-color));
             border-radius: 15px;
@@ -170,6 +166,10 @@
         .specials-header i {
             font-size: 2.5rem;
             color: var(--warning-color);
+        }
+        
+        .specials-header h2 {
+            font-size: 1.8rem;
         }
         
         .specials-grid {
@@ -224,7 +224,6 @@
             color: var(--warning-color);
         }
         
-        /* Categorias */
         .menu-categories {
             display: flex;
             gap: 10px;
@@ -258,7 +257,6 @@
             color: white;
         }
         
-        /* Layout Menu */
         .menu-layout {
             display: grid;
             grid-template-columns: 1fr 350px;
@@ -376,7 +374,6 @@
             gap: 5px;
         }
         
-        /* Carrinho */
         .cart-sidebar {
             background: white;
             border-radius: 10px;
@@ -537,7 +534,6 @@
             cursor: not-allowed;
         }
         
-        /* Admin Panel */
         #admin-panel, #login-screen {
             display: none;
         }
@@ -606,7 +602,6 @@
             display: block;
         }
         
-        /* Formulário */
         .form-container {
             background: white;
             padding: 2rem;
@@ -676,15 +671,6 @@
             display: block;
         }
         
-        .image-url-example {
-            font-size: 0.8rem;
-            color: #666;
-            margin-top: 5px;
-            padding: 5px;
-            background: #f5f5f5;
-            border-radius: 3px;
-        }
-        
         .form-buttons {
             display: flex;
             gap: 10px;
@@ -709,7 +695,6 @@
             color: white;
         }
         
-        /* Listas Admin */
         .admin-items-list, .orders-list {
             background: white;
             border-radius: 10px;
@@ -764,7 +749,6 @@
             color: white;
         }
         
-        /* Pedidos */
         .order-card {
             background: white;
             border-left: 5px solid var(--club-color);
@@ -831,7 +815,6 @@
             cursor: pointer;
         }
         
-        /* Login */
         .login-container {
             max-width: 400px;
             margin: 2rem auto;
@@ -865,7 +848,6 @@
             display: none;
         }
         
-        /* Toast */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -904,7 +886,6 @@
             to { transform: translateX(0); opacity: 1; }
         }
         
-        /* Modal */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -953,7 +934,6 @@
             margin-top: 1rem;
         }
         
-        /* Footer */
         footer {
             background: linear-gradient(135deg, var(--secondary-color), var(--club-color));
             color: white;
@@ -962,7 +942,6 @@
             margin-top: 2rem;
         }
         
-        /* Estilos para status dos pedidos */
         .status-pending {
             background-color: #fff3cd;
             color: #856404;
@@ -978,7 +957,6 @@
             color: #155724;
         }
         
-        /* Botões de status */
         .status-btn {
             padding: 5px 10px;
             border: none;
@@ -1021,7 +999,6 @@
             cursor: not-allowed;
         }
         
-        /* Botão imprimir */
         .print-btn {
             background-color: var(--secondary-color);
             color: white;
@@ -1031,7 +1008,6 @@
             background-color: #1a2634;
         }
         
-        /* Notificações melhoradas */
         .toast-notification {
             position: relative;
             padding: 20px;
@@ -1066,11 +1042,9 @@
     </header>
     
     <main class="container">
-        <!-- Cardápio -->
         <section id="menu-view">
             <h1 class="page-title">🍽️ Cardápio do Nosso Clube</h1>
             
-            <!-- Pratos do Dia -->
             <div class="daily-specials" id="dailySpecials">
                 <div class="specials-header">
                     <i class="fas fa-star"></i>
@@ -1079,7 +1053,6 @@
                 <div class="specials-grid" id="specialsGrid"></div>
             </div>
             
-            <!-- Categorias -->
             <div class="menu-categories" id="menuCategories">
                 <button class="category-btn active" data-category="all">Todos</button>
                 <button class="category-btn" data-category="comidas">Comidas</button>
@@ -1088,11 +1061,9 @@
                 <button class="category-btn special-btn" data-category="specials">⭐ Especiais</button>
             </div>
             
-            <!-- Menu e Carrinho -->
             <div class="menu-layout">
                 <div class="menu-grid" id="menuGrid"></div>
                 
-                <!-- Carrinho -->
                 <div class="cart-sidebar" id="cartSidebar">
                     <div class="cart-header">
                         <h3><i class="fas fa-shopping-cart"></i> Meu Pedido</h3>
@@ -1127,7 +1098,6 @@
             </div>
         </section>
         
-        <!-- Painel Admin -->
         <section id="admin-panel">
             <div class="admin-header">
                 <h2><i class="fas fa-crown"></i> Painel Administrativo</h2>
@@ -1175,18 +1145,10 @@
                         </div>
                         
                         <div class="form-group">
-                            <label>URL da Imagem (opcional)</label>
-                            <input type="url" id="itemImageUrl" placeholder="https://exemplo.com/imagem.jpg">
-                            <div class="image-url-example">
-                                💡 Dica: Use URLs do Unsplash, Pexels ou Imgur<br>
-                                Ex: https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Upload de Imagem (alternativa)</label>
-                                <input type="file" id="itemImage" accept="image/*">
+                            <label>Imagem do Item</label>
+                            <input type="file" id="itemImage" accept="image/*">
+                            <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                                💡 Selecione uma imagem do seu computador (formatos: JPG, PNG, WEBP)
                             </div>
                         </div>
                         
@@ -1227,7 +1189,6 @@
             </div>
         </section>
         
-        <!-- Login -->
         <section id="login-screen">
             <div class="login-container">
                 <h2 class="login-title">Área do Clube</h2>
@@ -1268,10 +1229,8 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO - URL DO BACKEND
         const API_URL = 'https://nosso-clube-api.onrender.com/api';
         
-        // Variáveis globais
         let token = localStorage.getItem('token');
         let menuItems = [];
         let categorias = [];
@@ -1282,7 +1241,6 @@
         let editingItemId = null;
         let unreadOrders = 0;
         
-        // Elementos DOM
         const menuView = document.getElementById('menu-view');
         const adminPanel = document.getElementById('admin-panel');
         const loginScreen = document.getElementById('login-screen');
@@ -1316,7 +1274,6 @@
         const itemPrice = document.getElementById('itemPrice');
         const itemDescription = document.getElementById('itemDescription');
         const itemImage = document.getElementById('itemImage');
-        const itemImageUrl = document.getElementById('itemImageUrl');
         const imagePreview = document.getElementById('imagePreview');
         const itemId = document.getElementById('itemId');
         const isSpecial = document.getElementById('isSpecial');
@@ -1332,7 +1289,6 @@
         const alertModal = document.getElementById('alertModal');
         const modalBody = document.getElementById('modalBody');
 
-        // ========== FUNÇÕES UTILITÁRIAS ==========
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.className = `toast-notification ${type}`;
@@ -1356,7 +1312,6 @@
             loadPedidos();
         }
 
-        // ========== FUNÇÕES DE VIEW ==========
         function showMenuView() {
             menuView.style.display = 'block';
             adminPanel.style.display = 'none';
@@ -1384,7 +1339,6 @@
             isAdminMode = false;
         }
 
-        // ========== FUNÇÕES DE API ==========
         async function loadCategorias() {
             try {
                 const response = await fetch(`${API_URL}/categorias`);
@@ -1426,99 +1380,81 @@
             }
         }
 
-        // ========== FUNÇÕES DE RENDERIZAÇÃO ==========
-   function renderMenuItems(categoria = 'all') {
-    menuGrid.innerHTML = '';
-    
-    // ========== LÓGICA CORRIGIDA PARA A URL DA IMAGEM ==========
-let imagemUrl = '';
-
-if (item.image) {
-    // Limpa qualquer concatenação errada que possa ter vindo do banco
-    let imagemLimpa = item.image.replace(/^https?:\/\/[^\/]+https?:\/\//, 'https://');
-
-    // Se a URL limpa começa com http, usa ela diretamente
-    if (imagemLimpa.startsWith('http')) {
-        imagemUrl = imagemLimpa;
-        console.log('✅ URL Externa Corrigida:', imagemUrl);
-    } else if (imagemLimpa.startsWith('/uploads')) {
-        // Apenas para referência, mas não vai funcionar no Render
-        imagemUrl = 'https://nosso-clube-api.onrender.com' + imagemLimpa;
-        console.warn('⚠️ Upload local (pode falhar):', imagemUrl);
-    } else {
-        imagemUrl = 'https://picsum.photos/300/200?random=' + item.id;
-    }
-} else {
-    imagemUrl = 'https://picsum.photos/300/200?random=' + item.id;
-}
-// ========== FIM DA CORREÇÃO ==========
-    
-    filtered.forEach(item => {
-        const precoNumerico = parseFloat(item.price) || 0;
-        const isSpecial = item.isSpecial;
-        const displayPrice = isSpecial ? (item.specialPrice || precoNumerico * 0.8) : precoNumerico;
-        
-        // ========== CORREÇÃO DEFINITIVA DAS URLs ==========
-        let imagemUrl = '';
-        
-        if (item.image) {
-            // CASO 1: URL já é completa (começa com http)
-            if (item.image.startsWith('http://') || item.image.startsWith('https://')) {
-                imagemUrl = item.image;  // USA A URL EXATAMENTE COMO ESTÁ
-                console.log('✅ URL externa detectada:', imagemUrl);
-            } 
-            // CASO 2: É upload local (começa com /uploads)
-            else if (item.image.startsWith('/uploads')) {
-                imagemUrl = 'https://nosso-clube-api.onrender.com' + item.image;
-                console.log('📦 Upload local:', imagemUrl);
+        function renderMenuItems(categoria = 'all') {
+            menuGrid.innerHTML = '';
+            
+            let filtered = [];
+            if (categoria === 'specials') {
+                filtered = menuItems.filter(item => item.isSpecial);
+            } else if (categoria === 'all') {
+                filtered = menuItems;
+            } else {
+                filtered = menuItems.filter(item => item.category === categoria);
             }
-            // CASO 3: Outro formato (fallback)
-            else {
-                imagemUrl = item.image;
-                console.log('⚠️ Formato não reconhecido:', imagemUrl);
+            
+            if (filtered.length === 0) {
+                menuGrid.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum item encontrado</p>';
+                return;
             }
-        } else {
-            // CASO 4: Sem imagem - usa placeholder
-            imagemUrl = 'https://picsum.photos/300/200?random=' + item.id;
-        }
-        // ========== FIM DA CORREÇÃO ==========
-        
-        const card = document.createElement('div');
-        card.className = `menu-item ${isSpecial ? 'special-item-card' : ''}`;
-        
-        card.innerHTML = `
-            ${isSpecial ? '<span class="special-badge"><i class="fas fa-star"></i> PRATO DO DIA</span>' : ''}
-            <img src="${imagemUrl}" 
-                 class="item-image" 
-                 onerror="this.src='https://picsum.photos/300/200?random=1'; console.log('❌ Erro ao carregar imagem:', '${imagemUrl}');">
-            <div class="item-details">
-                <div class="item-header">
-                    <h3 class="item-name">${item.name}</h3>
-                    ${isSpecial ? 
-                        `<span class="item-price special-price">R$ ${displayPrice.toFixed(2)}</span>
-                         <span class="original-price-small">R$ ${precoNumerico.toFixed(2)}</span>` :
-                        `<span class="item-price">R$ ${precoNumerico.toFixed(2)}</span>`
+            
+            filtered.forEach(item => {
+                const precoNumerico = parseFloat(item.price) || 0;
+                const isSpecial = item.isSpecial;
+                const displayPrice = isSpecial ? (item.specialPrice || precoNumerico * 0.8) : precoNumerico;
+                
+                let imagemUrl = '';
+                
+                if (item.image) {
+                    if (item.image.startsWith('http://') || item.image.startsWith('https://')) {
+                        imagemUrl = item.image;
+                        console.log('✅ URL externa detectada:', imagemUrl);
+                    } else if (item.image.startsWith('/uploads')) {
+                        imagemUrl = 'https://nosso-clube-api.onrender.com' + item.image;
+                        console.log('📦 Upload local:', imagemUrl);
+                    } else {
+                        imagemUrl = item.image;
                     }
-                </div>
-                <p class="item-description">${item.description || ''}</p>
-                <div class="item-footer">
-                    <span class="item-category">${item.category}</span>
-                    <button class="add-to-cart-btn" onclick="addToCart(${JSON.stringify({
-                        id: item.id,
-                        name: item.name,
-                        price: displayPrice,
-                        originalPrice: precoNumerico,
-                        image: imagemUrl
-                    }).replace(/"/g, '&quot;')})">
-                        <i class="fas fa-cart-plus"></i> Add
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        menuGrid.appendChild(card);
-    });
-}
+                } else {
+                    imagemUrl = 'https://picsum.photos/300/200?random=' + item.id;
+                }
+                
+                const card = document.createElement('div');
+                card.className = `menu-item ${isSpecial ? 'special-item-card' : ''}`;
+                
+                card.innerHTML = `
+                    ${isSpecial ? '<span class="special-badge"><i class="fas fa-star"></i> PRATO DO DIA</span>' : ''}
+                    <img src="${imagemUrl}" 
+                         class="item-image" 
+                         onerror="this.src='https://picsum.photos/300/200?random=1'; console.log('❌ Erro ao carregar imagem:', '${imagemUrl}');">
+                    <div class="item-details">
+                        <div class="item-header">
+                            <h3 class="item-name">${item.name}</h3>
+                            ${isSpecial ? 
+                                `<span class="item-price special-price">R$ ${displayPrice.toFixed(2)}</span>
+                                 <span class="original-price-small">R$ ${precoNumerico.toFixed(2)}</span>` :
+                                `<span class="item-price">R$ ${precoNumerico.toFixed(2)}</span>`
+                            }
+                        </div>
+                        <p class="item-description">${item.description || ''}</p>
+                        <div class="item-footer">
+                            <span class="item-category">${item.category}</span>
+                            <button class="add-to-cart-btn" onclick="addToCart(${JSON.stringify({
+                                id: item.id,
+                                name: item.name,
+                                price: displayPrice,
+                                originalPrice: precoNumerico,
+                                image: imagemUrl
+                            }).replace(/"/g, '&quot;')})">
+                                <i class="fas fa-cart-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                menuGrid.appendChild(card);
+            });
+        }
+
         function renderSpecialsSection() {
             const specials = menuItems.filter(item => item.isSpecial);
             specialsGrid.innerHTML = '';
@@ -1532,10 +1468,23 @@ if (item.image) {
                 const precoOriginal = parseFloat(item.price) || 0;
                 const precoPromo = item.specialPrice || precoOriginal * 0.8;
                 
+                let imagemUrl = '';
+                if (item.image) {
+                    if (item.image.startsWith('http')) {
+                        imagemUrl = item.image;
+                    } else if (item.image.startsWith('/uploads')) {
+                        imagemUrl = 'https://nosso-clube-api.onrender.com' + item.image;
+                    } else {
+                        imagemUrl = item.image;
+                    }
+                } else {
+                    imagemUrl = 'https://picsum.photos/80/80?random=' + item.id;
+                }
+                
                 const card = document.createElement('div');
                 card.className = 'special-item';
                 card.innerHTML = `
-                    <img src="${item.image || 'https://picsum.photos/80/80?random=' + item.id}" 
+                    <img src="${imagemUrl}" 
                          class="special-image" 
                          onerror="this.src='https://picsum.photos/80/80?random=1'">
                     <div>
@@ -1551,7 +1500,7 @@ if (item.image) {
                             name: item.name,
                             price: precoPromo,
                             originalPrice: precoOriginal,
-                            image: item.image
+                            image: imagemUrl
                         }).replace(/"/g, '&quot;')})">
                             <i class="fas fa-cart-plus"></i> Adicionar
                         </button>
@@ -1562,54 +1511,52 @@ if (item.image) {
             });
         }
 
-       function renderAdminItems() {
-    adminItemsContainer.innerHTML = '';
-    
-    if (menuItems.length === 0) {
-        adminItemsContainer.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum item cadastrado</p>';
-        return;
-    }
-    
-    menuItems.forEach(item => {
-        // ========== CORREÇÃO DEFINITIVA DAS URLs (ADMIN) ==========
-        let imagemUrl = '';
-        
-        if (item.image) {
-            if (item.image.startsWith('http://') || item.image.startsWith('https://')) {
-                imagemUrl = item.image;
-            } else if (item.image.startsWith('/uploads')) {
-                imagemUrl = 'https://nosso-clube-api.onrender.com' + item.image;
-            } else {
-                imagemUrl = item.image;
+        function renderAdminItems() {
+            adminItemsContainer.innerHTML = '';
+            
+            if (menuItems.length === 0) {
+                adminItemsContainer.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum item cadastrado</p>';
+                return;
             }
-        } else {
-            imagemUrl = 'https://picsum.photos/80/80?random=' + item.id;
+            
+            menuItems.forEach(item => {
+                let imagemUrl = '';
+                
+                if (item.image) {
+                    if (item.image.startsWith('http://') || item.image.startsWith('https://')) {
+                        imagemUrl = item.image;
+                    } else if (item.image.startsWith('/uploads')) {
+                        imagemUrl = 'https://nosso-clube-api.onrender.com' + item.image;
+                    } else {
+                        imagemUrl = item.image;
+                    }
+                } else {
+                    imagemUrl = 'https://picsum.photos/80/80?random=' + item.id;
+                }
+                
+                const div = document.createElement('div');
+                div.className = 'admin-item';
+                div.innerHTML = `
+                    <img src="${imagemUrl}" 
+                         class="admin-item-image"
+                         onerror="this.src='https://picsum.photos/80/80?random=1'">
+                    <div>
+                        <h4>${item.name}</h4>
+                        <p>R$ ${parseFloat(item.price).toFixed(2)}</p>
+                        ${item.isSpecial ? '<p style="color: var(--warning-color);">⭐ Prato do Dia</p>' : ''}
+                    </div>
+                    <div class="admin-item-actions">
+                        <button class="action-btn edit-btn" onclick="editarItem(${item.id})">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="action-btn delete-btn" onclick="deletarItem(${item.id})">
+                            <i class="fas fa-trash"></i> Excluir
+                        </button>
+                    </div>
+                `;
+                adminItemsContainer.appendChild(div);
+            });
         }
-        // ========== FIM DA CORREÇÃO ==========
-        
-        const div = document.createElement('div');
-        div.className = 'admin-item';
-        div.innerHTML = `
-            <img src="${imagemUrl}" 
-                 class="admin-item-image"
-                 onerror="this.src='https://picsum.photos/80/80?random=1'">
-            <div>
-                <h4>${item.name}</h4>
-                <p>R$ ${parseFloat(item.price).toFixed(2)}</p>
-                ${item.isSpecial ? '<p style="color: var(--warning-color);">⭐ Prato do Dia</p>' : ''}
-            </div>
-            <div class="admin-item-actions">
-                <button class="action-btn edit-btn" onclick="editarItem(${item.id})">
-                    <i class="fas fa-edit"></i> Editar
-                </button>
-                <button class="action-btn delete-btn" onclick="deletarItem(${item.id})">
-                    <i class="fas fa-trash"></i> Excluir
-                </button>
-            </div>
-        `;
-        adminItemsContainer.appendChild(div);
-    });
-}  
 
         function renderOrders() {
             ordersContainer.innerHTML = '';
@@ -1624,7 +1571,6 @@ if (item.image) {
                 div.className = 'order-card';
                 div.setAttribute('data-pedido-id', order.id);
                 
-                // Determinar a classe de status
                 let statusClass = '';
                 let statusText = '';
                 
@@ -1646,7 +1592,6 @@ if (item.image) {
                         statusText = '⏳ Pendente';
                 }
                 
-                // Formatar itens do pedido
                 let itemsHtml = '';
                 if (order.itens && order.itens.length > 0) {
                     itemsHtml = order.itens.map(item => {
@@ -1726,10 +1671,23 @@ if (item.image) {
             }
             
             specials.forEach(item => {
+                let imagemUrl = '';
+                if (item.image) {
+                    if (item.image.startsWith('http')) {
+                        imagemUrl = item.image;
+                    } else if (item.image.startsWith('/uploads')) {
+                        imagemUrl = 'https://nosso-clube-api.onrender.com' + item.image;
+                    } else {
+                        imagemUrl = item.image;
+                    }
+                } else {
+                    imagemUrl = 'https://picsum.photos/80/80?random=' + item.id;
+                }
+                
                 const div = document.createElement('div');
                 div.className = 'admin-item';
                 div.innerHTML = `
-                    <img src="${item.image || 'https://picsum.photos/80/80?random=' + item.id}" 
+                    <img src="${imagemUrl}" 
                          class="admin-item-image"
                          onerror="this.src='https://picsum.photos/80/80?random=1'">
                     <div>
@@ -1742,7 +1700,6 @@ if (item.image) {
             });
         }
 
-        // ========== FUNÇÕES DO CARRINHO ==========
         window.addToCart = function(item) {
             const existing = cart.find(i => i.id === item.id);
             if (existing) {
@@ -1791,9 +1748,23 @@ if (item.image) {
             cart.forEach(item => {
                 const itemTotal = item.price * item.quantity;
                 subtotal += itemTotal;
+                
+                let imagemUrl = '';
+                if (item.image) {
+                    if (item.image.startsWith('http')) {
+                        imagemUrl = item.image;
+                    } else if (item.image.startsWith('/uploads')) {
+                        imagemUrl = 'https://nosso-clube-api.onrender.com' + item.image;
+                    } else {
+                        imagemUrl = item.image;
+                    }
+                } else {
+                    imagemUrl = 'https://picsum.photos/50/50?random=' + item.id;
+                }
+                
                 itemsHtml += `
                     <div class="cart-item">
-                        <img src="${item.image || 'https://picsum.photos/50/50?random=' + item.id}" 
+                        <img src="${imagemUrl}" 
                              class="cart-item-image"
                              onerror="this.src='https://picsum.photos/50/50?random=1'">
                         <div>
@@ -1819,7 +1790,6 @@ if (item.image) {
             checkoutBtn.disabled = false;
         }
 
-        // ========== FUNÇÕES DE CHECKOUT E NOTIFICAÇÕES ==========
         async function checkout(e) {
             e.preventDefault();
             
@@ -1847,7 +1817,6 @@ if (item.image) {
                 if (response.ok) {
                     const data = await response.json();
                     
-                    // Criar objeto do novo pedido
                     const novoPedido = {
                         id: Date.now(),
                         numero_pedido: data.numero_pedido,
@@ -1864,21 +1833,17 @@ if (item.image) {
                         }))
                     };
                     
-                    // Adicionar à lista de pedidos
                     orders.unshift(novoPedido);
                     
-                    // NOTIFICAÇÃO PARA O ADMIN
                     if (isLoggedIn) {
                         mostrarNotificacaoPedido(novoPedido);
                         renderOrders();
                     }
                     
-                    // Incrementar contador de notificações
                     unreadOrders++;
                     
                     showToast(`Pedido #${data.numero_pedido} realizado!`, 'success');
                     
-                    // Limpar carrinho
                     cart = [];
                     updateCart();
                     checkoutForm.reset();
@@ -1969,7 +1934,6 @@ if (item.image) {
             }, 500);
         };
 
-        // ========== FUNÇÕES DE GERENCIAMENTO DE PEDIDOS ==========
         window.atualizarStatusPedido = async function(pedidoId, novoStatus) {
             try {
                 const token = localStorage.getItem('token');
@@ -2122,7 +2086,6 @@ if (item.image) {
             printWindow.print();
         };
 
-        // ========== FUNÇÕES DE LOGIN ==========
         async function handleLoginSubmit(e) {
             e.preventDefault();
             
@@ -2151,70 +2114,23 @@ if (item.image) {
             }
         }
 
-        // ========== FUNÇÕES DE ADMIN (ITENS) ==========
         async function handleItemSubmit(e) {
             e.preventDefault();
             
-            // Verificar se tem URL da imagem ou arquivo
-            let imagemValue = null;
+            const formData = new FormData();
+            formData.append('nome', itemName.value);
+            formData.append('categoria_id', itemCategory.value);
+            formData.append('preco', itemPrice.value);
+            formData.append('descricao', itemDescription.value);
+            formData.append('is_special', isSpecial.checked);
             
-            if (itemImageUrl.value) {
-                // Usar URL da imagem
-                imagemValue = itemImageUrl.value;
-            } else if (itemImage.files[0]) {
-                // Se for upload, precisamos enviar como FormData
-                const formData = new FormData();
-                formData.append('nome', itemName.value);
-                formData.append('categoria_id', itemCategory.value);
-                formData.append('preco', itemPrice.value);
-                formData.append('descricao', itemDescription.value);
-                formData.append('is_special', isSpecial.checked);
+            if (itemImage.files[0]) {
                 formData.append('imagem', itemImage.files[0]);
-                
-                if (specialPrice.value) {
-                    formData.append('preco_promocional', specialPrice.value);
-                }
-                
-                if (editingItemId) {
-                    formData.append('id', editingItemId);
-                }
-                
-                try {
-                    const url = editingItemId ? 
-                        `${API_URL}/itens/${editingItemId}` : 
-                        `${API_URL}/itens`;
-                    
-                    const response = await fetch(url, {
-                        method: editingItemId ? 'PUT' : 'POST',
-                        headers: { 'Authorization': `Bearer ${token}` },
-                        body: formData
-                    });
-                    
-                    if (response.ok) {
-                        showToast(editingItemId ? 'Item atualizado!' : 'Item criado!');
-                        itemForm.classList.remove('active');
-                        await loadItens();
-                    } else {
-                        const error = await response.text();
-                        showToast('Erro: ' + error, 'error');
-                    }
-                } catch (error) {
-                    console.error('Erro:', error);
-                    showToast('Erro ao salvar', 'error');
-                }
-                return;
             }
             
-            // Se não tem arquivo, usar JSON com URL
-            const itemData = {
-                nome: itemName.value,
-                categoria_id: parseInt(itemCategory.value),
-                preco: parseFloat(itemPrice.value),
-                descricao: itemDescription.value,
-                imagem: imagemValue, // Pode ser null ou URL
-                is_special: isSpecial.checked,
-                preco_promocional: specialPrice.value ? parseFloat(specialPrice.value) : null
-            };
+            if (specialPrice.value) {
+                formData.append('preco_promocional', specialPrice.value);
+            }
             
             try {
                 const url = editingItemId ? 
@@ -2223,11 +2139,8 @@ if (item.image) {
                 
                 const response = await fetch(url, {
                     method: editingItemId ? 'PUT' : 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(itemData)
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
                 });
                 
                 if (response.ok) {
@@ -2244,7 +2157,6 @@ if (item.image) {
             }
         }
 
-        // Função de editar item (corrigida)
         window.editarItem = function(id) {
             const item = menuItems.find(i => i.id === id);
             if (!item) {
@@ -2255,10 +2167,8 @@ if (item.image) {
             console.log('Editando item:', item);
             editingItemId = id;
             
-            // Preencher o formulário
             itemName.value = item.name || '';
             
-            // Encontrar o ID da categoria pelo nome
             const categoria = categorias.find(c => c.nome === item.category);
             if (categoria) {
                 itemCategory.value = categoria.id;
@@ -2267,15 +2177,8 @@ if (item.image) {
             itemPrice.value = item.price || '';
             itemDescription.value = item.description || '';
             
-            // Se tiver URL da imagem, mostrar no campo
-            if (item.image && item.image.startsWith('http')) {
-                itemImageUrl.value = item.image;
-                imagePreview.src = item.image;
-                imagePreview.classList.add('active');
-            } else {
-                itemImageUrl.value = '';
-                imagePreview.classList.remove('active');
-            }
+            imagePreview.classList.remove('active');
+            imagePreview.src = '';
             
             isSpecial.checked = item.isSpecial || false;
             
@@ -2290,7 +2193,6 @@ if (item.image) {
             formTitle.textContent = 'Editar Item';
             itemForm.classList.add('active');
             
-            // Rolar para o formulário
             itemForm.scrollIntoView({ behavior: 'smooth' });
         };
 
@@ -2316,7 +2218,6 @@ if (item.image) {
             }
         };
 
-        // ========== EVENT LISTENERS ==========
         function setupEventListeners() {
             console.log('Configurando event listeners...');
             
@@ -2380,7 +2281,6 @@ if (item.image) {
                 editingItemId = null;
                 itemFormElement.reset();
                 imagePreview.classList.remove('active');
-                itemImageUrl.value = '';
                 formTitle.textContent = 'Novo Item';
                 itemForm.classList.add('active');
             });
@@ -2405,17 +2305,6 @@ if (item.image) {
                 }
             });
             
-            // Preview de imagem por URL
-            itemImageUrl.addEventListener('input', function() {
-                if (this.value) {
-                    imagePreview.src = this.value;
-                    imagePreview.classList.add('active');
-                } else {
-                    imagePreview.classList.remove('active');
-                }
-            });
-            
-            // Preview de imagem por upload
             itemImage.addEventListener('change', function() {
                 const file = this.files[0];
                 if (file) {
@@ -2423,8 +2312,6 @@ if (item.image) {
                     reader.onload = (e) => {
                         imagePreview.src = e.target.result;
                         imagePreview.classList.add('active');
-                        // Limpar campo de URL se tiver
-                        itemImageUrl.value = '';
                     };
                     reader.readAsDataURL(file);
                 }
@@ -2434,7 +2321,6 @@ if (item.image) {
             loginForm.addEventListener('submit', handleLoginSubmit);
         }
 
-        // ========== INITIALIZATION ==========
         async function init() {
             console.log('Inicializando sistema...');
             await loadCategorias();
