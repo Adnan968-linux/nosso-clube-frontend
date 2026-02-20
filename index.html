@@ -1427,7 +1427,7 @@
         }
 
         // ========== FUNÇÕES DE RENDERIZAÇÃO ==========
-             function renderMenuItems(categoria = 'all') {
+   function renderMenuItems(categoria = 'all') {
     menuGrid.innerHTML = '';
     
     let filtered = [];
@@ -1449,28 +1449,30 @@
         const isSpecial = item.isSpecial;
         const displayPrice = isSpecial ? (item.specialPrice || precoNumerico * 0.8) : precoNumerico;
         
-        // CORREÇÃO DEFINITIVA: Tratar URL da imagem
+        // ========== CORREÇÃO DEFINITIVA DAS URLs ==========
         let imagemUrl = '';
         
         if (item.image) {
-            // Se a imagem começa com http, usar direto (URL externa)
-            if (item.image.startsWith('http')) {
-                imagemUrl = item.image;
-                console.log('✅ Usando URL externa:', imagemUrl);
+            // CASO 1: URL já é completa (começa com http)
+            if (item.image.startsWith('http://') || item.image.startsWith('https://')) {
+                imagemUrl = item.image;  // USA A URL EXATAMENTE COMO ESTÁ
+                console.log('✅ URL externa detectada:', imagemUrl);
             } 
-            // Se começa com /uploads, concatenar com backend
+            // CASO 2: É upload local (começa com /uploads)
             else if (item.image.startsWith('/uploads')) {
                 imagemUrl = 'https://nosso-clube-api.onrender.com' + item.image;
-                console.log('📦 Usando upload local:', imagemUrl);
+                console.log('📦 Upload local:', imagemUrl);
             }
-            // Outro caso, usar como está
+            // CASO 3: Outro formato (fallback)
             else {
                 imagemUrl = item.image;
+                console.log('⚠️ Formato não reconhecido:', imagemUrl);
             }
         } else {
-            // Sem imagem, usar placeholder
+            // CASO 4: Sem imagem - usa placeholder
             imagemUrl = 'https://picsum.photos/300/200?random=' + item.id;
         }
+        // ========== FIM DA CORREÇÃO ==========
         
         const card = document.createElement('div');
         card.className = `menu-item ${isSpecial ? 'special-item-card' : ''}`;
@@ -1479,7 +1481,7 @@
             ${isSpecial ? '<span class="special-badge"><i class="fas fa-star"></i> PRATO DO DIA</span>' : ''}
             <img src="${imagemUrl}" 
                  class="item-image" 
-                 onerror="this.src='https://picsum.photos/300/200?random=1'">
+                 onerror="this.src='https://picsum.photos/300/200?random=1'; console.log('❌ Erro ao carregar imagem:', '${imagemUrl}');">
             <div class="item-details">
                 <div class="item-header">
                     <h3 class="item-name">${item.name}</h3>
@@ -1551,7 +1553,7 @@
             });
         }
 
-            function renderAdminItems() {
+       function renderAdminItems() {
     adminItemsContainer.innerHTML = '';
     
     if (menuItems.length === 0) {
@@ -1560,11 +1562,11 @@
     }
     
     menuItems.forEach(item => {
-        // CORREÇÃO DEFINITIVA: Mesma lógica para URLs
+        // ========== CORREÇÃO DEFINITIVA DAS URLs (ADMIN) ==========
         let imagemUrl = '';
         
         if (item.image) {
-            if (item.image.startsWith('http')) {
+            if (item.image.startsWith('http://') || item.image.startsWith('https://')) {
                 imagemUrl = item.image;
             } else if (item.image.startsWith('/uploads')) {
                 imagemUrl = 'https://nosso-clube-api.onrender.com' + item.image;
@@ -1574,6 +1576,7 @@
         } else {
             imagemUrl = 'https://picsum.photos/80/80?random=' + item.id;
         }
+        // ========== FIM DA CORREÇÃO ==========
         
         const div = document.createElement('div');
         div.className = 'admin-item';
@@ -1597,7 +1600,7 @@
         `;
         adminItemsContainer.appendChild(div);
     });
-}
+}  
 
         function renderOrders() {
             ordersContainer.innerHTML = '';
