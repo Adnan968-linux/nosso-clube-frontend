@@ -6,6 +6,7 @@
     <title>Nosso Clube - Cardápio Digital</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Seu CSS existente permanece o mesmo */
         :root {
             --primary-color: #d35400;
             --secondary-color: #2c3e50;
@@ -636,6 +637,18 @@
             border-radius: 5px;
         }
         
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
         .form-checkbox {
             display: flex;
             align-items: center;
@@ -655,11 +668,21 @@
             max-width: 200px;
             max-height: 200px;
             margin-top: 10px;
+            border-radius: 5px;
             display: none;
         }
         
         .image-preview.active {
             display: block;
+        }
+        
+        .image-url-example {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+            padding: 5px;
+            background: #f5f5f5;
+            border-radius: 3px;
         }
         
         .form-buttons {
@@ -1130,25 +1153,48 @@
                     <h3 id="formTitle">Novo Item</h3>
                     <form id="itemFormElement">
                         <div class="form-group">
-                            <label>Nome</label>
+                            <label>Nome do Item *</label>
                             <input type="text" id="itemName" required>
                         </div>
                         
                         <div class="form-group">
-                            <label>Categoria</label>
+                            <label>Categoria *</label>
                             <select id="itemCategory" required>
-                                <option value="">Selecione</option>
+                                <option value="">Selecione uma categoria</option>
                             </select>
                         </div>
                         
                         <div class="form-group">
-                            <label>Preço (use . ponto)</label>
+                            <label>Preço * (use . ponto. Ex: 24.90)</label>
                             <input type="number" id="itemPrice" step="0.01" required>
                         </div>
                         
+                        <div class="form-group">
+                            <label>Descrição</label>
+                            <textarea id="itemDescription" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>URL da Imagem (opcional)</label>
+                            <input type="url" id="itemImageUrl" placeholder="https://exemplo.com/imagem.jpg">
+                            <div class="image-url-example">
+                                💡 Dica: Use URLs do Unsplash, Pexels ou Imgur<br>
+                                Ex: https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Upload de Imagem (alternativa)</label>
+                                <input type="file" id="itemImage" accept="image/*">
+                            </div>
+                        </div>
+                        
+                        <img id="imagePreview" class="image-preview" alt="Prévia da imagem">
+                        
                         <div class="form-checkbox">
                             <input type="checkbox" id="isSpecial">
-                            <label>Prato do Dia</label>
+                            <label>Prato do Dia (em promoção)</label>
                         </div>
                         
                         <div class="special-price-input" id="specialPriceGroup">
@@ -1158,22 +1204,11 @@
                             </div>
                         </div>
                         
-                        <div class="form-group">
-                            <label>Descrição</label>
-                            <textarea id="itemDescription"></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Imagem</label>
-                            <input type="file" id="itemImage" accept="image/*">
-                            <img id="imagePreview" class="image-preview">
-                        </div>
-                        
                         <input type="hidden" id="itemId">
                         
                         <div class="form-buttons">
                             <button type="button" class="btn btn-secondary" id="cancelBtn">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Salvar</button>
+                            <button type="submit" class="btn btn-primary">Salvar Item</button>
                         </div>
                     </form>
                 </div>
@@ -1281,6 +1316,7 @@
         const itemPrice = document.getElementById('itemPrice');
         const itemDescription = document.getElementById('itemDescription');
         const itemImage = document.getElementById('itemImage');
+        const itemImageUrl = document.getElementById('itemImageUrl');
         const imagePreview = document.getElementById('imagePreview');
         const itemId = document.getElementById('itemId');
         const isSpecial = document.getElementById('isSpecial');
@@ -1353,7 +1389,7 @@
             try {
                 const response = await fetch(`${API_URL}/categorias`);
                 categorias = await response.json();
-                itemCategory.innerHTML = '<option value="">Selecione</option>';
+                itemCategory.innerHTML = '<option value="">Selecione uma categoria</option>';
                 categorias.forEach(cat => {
                     itemCategory.innerHTML += `<option value="${cat.id}">${cat.nome}</option>`;
                 });
@@ -1511,13 +1547,14 @@
                     <div>
                         <h4>${item.name}</h4>
                         <p>R$ ${parseFloat(item.price).toFixed(2)}</p>
+                        ${item.isSpecial ? '<p style="color: var(--warning-color);">⭐ Prato do Dia</p>' : ''}
                     </div>
                     <div class="admin-item-actions">
-                        <button class="action-btn edit-btn" onclick="editItem(${item.id})">
-                            <i class="fas fa-edit"></i>
+                        <button class="action-btn edit-btn" onclick="editarItem(${item.id})">
+                            <i class="fas fa-edit"></i> Editar
                         </button>
-                        <button class="action-btn delete-btn" onclick="deleteItem(${item.id})">
-                            <i class="fas fa-trash"></i>
+                        <button class="action-btn delete-btn" onclick="deletarItem(${item.id})">
+                            <i class="fas fa-trash"></i> Excluir
                         </button>
                     </div>
                 `;
@@ -1616,7 +1653,7 @@
                             </button>
                         </div>
                         <div style="display: flex; gap: 5px;">
-                            <button class="action-btn print-btn" onclick="printOrder(${order.id})">
+                            <button class="action-btn print-btn" onclick="imprimirPedido(${order.id})">
                                 <i class="fas fa-print"></i> Imprimir
                             </button>
                             <button class="action-btn delete-btn" onclick="excluirPedido(${order.id})">
@@ -1635,7 +1672,7 @@
             const specials = menuItems.filter(item => item.isSpecial);
             
             if (specials.length === 0) {
-                specialsAdminContainer.innerHTML = '<p>Nenhum item especial</p>';
+                specialsAdminContainer.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum item especial</p>';
                 return;
             }
             
@@ -1643,9 +1680,13 @@
                 const div = document.createElement('div');
                 div.className = 'admin-item';
                 div.innerHTML = `
+                    <img src="${item.image || 'https://picsum.photos/80/80?random=' + item.id}" 
+                         class="admin-item-image"
+                         onerror="this.src='https://picsum.photos/80/80?random=1'">
                     <div>
                         <h4>${item.name}</h4>
-                        <p>Promoção: R$ ${(item.specialPrice || item.price * 0.8).toFixed(2)}</p>
+                        <p>De: R$ ${parseFloat(item.price).toFixed(2)}</p>
+                        <p style="color: var(--warning-color); font-weight: 700;">Por: R$ ${(item.specialPrice || item.price * 0.8).toFixed(2)}</p>
                     </div>
                 `;
                 specialsAdminContainer.appendChild(div);
@@ -1950,7 +1991,7 @@
             }
         };
 
-        window.printOrder = function(orderId) {
+        window.imprimirPedido = function(orderId) {
             const order = orders.find(o => o.id === orderId);
             if (!order) return;
             
@@ -2065,30 +2106,83 @@
         async function handleItemSubmit(e) {
             e.preventDefault();
             
-            const formData = new FormData();
-            formData.append('nome', itemName.value);
-            formData.append('categoria_id', itemCategory.value);
-            formData.append('preco', itemPrice.value);
-            formData.append('descricao', itemDescription.value);
-            formData.append('is_special', isSpecial.checked);
+            // Verificar se tem URL da imagem ou arquivo
+            let imagemValue = null;
             
-            if (specialPrice.value) {
-                formData.append('preco_promocional', specialPrice.value);
-            }
-            
-            if (itemImage.files[0]) {
+            if (itemImageUrl.value) {
+                // Usar URL da imagem
+                imagemValue = itemImageUrl.value;
+            } else if (itemImage.files[0]) {
+                // Se for upload, precisamos enviar como FormData
+                const formData = new FormData();
+                formData.append('nome', itemName.value);
+                formData.append('categoria_id', itemCategory.value);
+                formData.append('preco', itemPrice.value);
+                formData.append('descricao', itemDescription.value);
+                formData.append('is_special', isSpecial.checked);
                 formData.append('imagem', itemImage.files[0]);
+                
+                if (specialPrice.value) {
+                    formData.append('preco_promocional', specialPrice.value);
+                }
+                
+                if (editingItemId) {
+                    formData.append('id', editingItemId);
+                }
+                
+                try {
+                    const url = editingItemId ? 
+                        `${API_URL}/itens/${editingItemId}` : 
+                        `${API_URL}/itens`;
+                    
+                    const response = await fetch(url, {
+                        method: editingItemId ? 'PUT' : 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        showToast(editingItemId ? 'Item atualizado!' : 'Item criado!');
+                        itemForm.classList.remove('active');
+                        await loadItens();
+                    } else {
+                        const error = await response.text();
+                        showToast('Erro: ' + error, 'error');
+                    }
+                } catch (error) {
+                    console.error('Erro:', error);
+                    showToast('Erro ao salvar', 'error');
+                }
+                return;
             }
+            
+            // Se não tem arquivo, usar JSON com URL
+            const itemData = {
+                nome: itemName.value,
+                categoria_id: parseInt(itemCategory.value),
+                preco: parseFloat(itemPrice.value),
+                descricao: itemDescription.value,
+                imagem: imagemValue, // Pode ser null ou URL
+                is_special: isSpecial.checked,
+                preco_promocional: specialPrice.value ? parseFloat(specialPrice.value) : null
+            };
             
             try {
-                const response = await fetch(`${API_URL}/itens`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: formData
+                const url = editingItemId ? 
+                    `${API_URL}/itens/${editingItemId}` : 
+                    `${API_URL}/itens`;
+                
+                const response = await fetch(url, {
+                    method: editingItemId ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(itemData)
                 });
                 
                 if (response.ok) {
-                    showToast('Item salvo!');
+                    showToast(editingItemId ? 'Item atualizado!' : 'Item criado!');
                     itemForm.classList.remove('active');
                     await loadItens();
                 } else {
@@ -2101,26 +2195,58 @@
             }
         }
 
-        window.editItem = function(id) {
+        // Função de editar item (corrigida)
+        window.editarItem = function(id) {
             const item = menuItems.find(i => i.id === id);
-            if (item) {
-                editingItemId = id;
-                itemName.value = item.name;
-                itemCategory.value = categorias.find(c => c.nome === item.category)?.id || '';
-                itemPrice.value = item.price;
-                itemDescription.value = item.description || '';
-                isSpecial.checked = item.isSpecial;
-                if (item.isSpecial && item.specialPrice) {
-                    specialPriceGroup.classList.add('active');
-                    specialPrice.value = item.specialPrice;
-                }
-                formTitle.textContent = 'Editar Item';
-                itemForm.classList.add('active');
+            if (!item) {
+                console.error('Item não encontrado:', id);
+                return;
             }
+            
+            console.log('Editando item:', item);
+            editingItemId = id;
+            
+            // Preencher o formulário
+            itemName.value = item.name || '';
+            
+            // Encontrar o ID da categoria pelo nome
+            const categoria = categorias.find(c => c.nome === item.category);
+            if (categoria) {
+                itemCategory.value = categoria.id;
+            }
+            
+            itemPrice.value = item.price || '';
+            itemDescription.value = item.description || '';
+            
+            // Se tiver URL da imagem, mostrar no campo
+            if (item.image && item.image.startsWith('http')) {
+                itemImageUrl.value = item.image;
+                imagePreview.src = item.image;
+                imagePreview.classList.add('active');
+            } else {
+                itemImageUrl.value = '';
+                imagePreview.classList.remove('active');
+            }
+            
+            isSpecial.checked = item.isSpecial || false;
+            
+            if (item.isSpecial && item.specialPrice) {
+                specialPriceGroup.classList.add('active');
+                specialPrice.value = item.specialPrice;
+            } else {
+                specialPriceGroup.classList.remove('active');
+                specialPrice.value = '';
+            }
+            
+            formTitle.textContent = 'Editar Item';
+            itemForm.classList.add('active');
+            
+            // Rolar para o formulário
+            itemForm.scrollIntoView({ behavior: 'smooth' });
         };
 
-        window.deleteItem = async function(id) {
-            if (!confirm('Excluir item?')) return;
+        window.deletarItem = async function(id) {
+            if (!confirm('Tem certeza que deseja excluir este item?')) return;
             
             try {
                 const response = await fetch(`${API_URL}/itens/${id}`, {
@@ -2131,9 +2257,13 @@
                 if (response.ok) {
                     showToast('Item excluído!');
                     await loadItens();
+                } else {
+                    const error = await response.text();
+                    showToast('Erro: ' + error, 'error');
                 }
             } catch (error) {
                 console.error('Erro:', error);
+                showToast('Erro ao excluir', 'error');
             }
         };
 
@@ -2161,6 +2291,7 @@
                 if (cart.length > 0 && confirm('Limpar carrinho?')) {
                     cart = [];
                     updateCart();
+                    showToast('Carrinho limpo!');
                 }
             });
             
@@ -2200,6 +2331,7 @@
                 editingItemId = null;
                 itemFormElement.reset();
                 imagePreview.classList.remove('active');
+                itemImageUrl.value = '';
                 formTitle.textContent = 'Novo Item';
                 itemForm.classList.add('active');
             });
@@ -2224,6 +2356,17 @@
                 }
             });
             
+            // Preview de imagem por URL
+            itemImageUrl.addEventListener('input', function() {
+                if (this.value) {
+                    imagePreview.src = this.value;
+                    imagePreview.classList.add('active');
+                } else {
+                    imagePreview.classList.remove('active');
+                }
+            });
+            
+            // Preview de imagem por upload
             itemImage.addEventListener('change', function() {
                 const file = this.files[0];
                 if (file) {
@@ -2231,6 +2374,8 @@
                     reader.onload = (e) => {
                         imagePreview.src = e.target.result;
                         imagePreview.classList.add('active');
+                        // Limpar campo de URL se tiver
+                        itemImageUrl.value = '';
                     };
                     reader.readAsDataURL(file);
                 }
