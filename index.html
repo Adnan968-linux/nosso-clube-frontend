@@ -1427,64 +1427,75 @@
         }
 
         // ========== FUNÇÕES DE RENDERIZAÇÃO ==========
-        function renderMenuItems(categoria = 'all') {
-            menuGrid.innerHTML = '';
-            
-            let filtered = [];
-            if (categoria === 'specials') {
-                filtered = menuItems.filter(item => item.isSpecial);
-            } else if (categoria === 'all') {
-                filtered = menuItems;
-            } else {
-                filtered = menuItems.filter(item => item.category === categoria);
-            }
-            
-            if (filtered.length === 0) {
-                menuGrid.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum item encontrado</p>';
-                return;
-            }
-            
-            filtered.forEach(item => {
-                const precoNumerico = parseFloat(item.price) || 0;
-                const isSpecial = item.isSpecial;
-                const displayPrice = isSpecial ? (item.specialPrice || precoNumerico * 0.8) : precoNumerico;
-                
-                const card = document.createElement('div');
-                card.className = `menu-item ${isSpecial ? 'special-item-card' : ''}`;
-                
-                card.innerHTML = `
-                    ${isSpecial ? '<span class="special-badge"><i class="fas fa-star"></i> PRATO DO DIA</span>' : ''}
-                    <img src="${item.image || 'https://picsum.photos/300/200?random=' + item.id}" 
-                         class="item-image" 
-                         onerror="this.src='https://picsum.photos/300/200?random=1'">
-                    <div class="item-details">
-                        <div class="item-header">
-                            <h3 class="item-name">${item.name}</h3>
-                            ${isSpecial ? 
-                                `<span class="item-price special-price">R$ ${displayPrice.toFixed(2)}</span>
-                                 <span class="original-price-small">R$ ${precoNumerico.toFixed(2)}</span>` :
-                                `<span class="item-price">R$ ${precoNumerico.toFixed(2)}</span>`
-                            }
-                        </div>
-                        <p class="item-description">${item.description || ''}</p>
-                        <div class="item-footer">
-                            <span class="item-category">${item.category}</span>
-                            <button class="add-to-cart-btn" onclick="addToCart(${JSON.stringify({
-                                id: item.id,
-                                name: item.name,
-                                price: displayPrice,
-                                originalPrice: precoNumerico,
-                                image: item.image
-                            }).replace(/"/g, '&quot;')})">
-                                <i class="fas fa-cart-plus"></i> Add
-                            </button>
-                        </div>
-                    </div>
-                `;
-                
-                menuGrid.appendChild(card);
-            });
+       function renderMenuItems(categoria = 'all') {
+    menuGrid.innerHTML = '';
+    
+    let filtered = [];
+    if (categoria === 'specials') {
+        filtered = menuItems.filter(item => item.isSpecial);
+    } else if (categoria === 'all') {
+        filtered = menuItems;
+    } else {
+        filtered = menuItems.filter(item => item.category === categoria);
+    }
+    
+    if (filtered.length === 0) {
+        menuGrid.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum item encontrado</p>';
+        return;
+    }
+    
+    filtered.forEach(item => {
+        const precoNumerico = parseFloat(item.price) || 0;
+        const isSpecial = item.isSpecial;
+        const displayPrice = isSpecial ? (item.specialPrice || precoNumerico * 0.8) : precoNumerico;
+        
+        // CORREÇÃO: Verificar se a imagem já é uma URL completa
+        let imagemUrl = item.image || 'https://picsum.photos/300/200?random=' + item.id;
+        
+        // IMPORTANTE: Se a imagem começa com http, usar direto, sem concatenar com o backend
+        if (imagemUrl.startsWith('http')) {
+            // Já é URL completa, manter como está
+        } else {
+            // É caminho relativo, concatenar com backend
+            imagemUrl = API_URL.replace('/api', '') + imagemUrl;
         }
+        
+        const card = document.createElement('div');
+        card.className = `menu-item ${isSpecial ? 'special-item-card' : ''}`;
+        
+        card.innerHTML = `
+            ${isSpecial ? '<span class="special-badge"><i class="fas fa-star"></i> PRATO DO DIA</span>' : ''}
+            <img src="${imagemUrl}" 
+                 class="item-image" 
+                 onerror="this.src='https://picsum.photos/300/200?random=1'">
+            <div class="item-details">
+                <div class="item-header">
+                    <h3 class="item-name">${item.name}</h3>
+                    ${isSpecial ? 
+                        `<span class="item-price special-price">R$ ${displayPrice.toFixed(2)}</span>
+                         <span class="original-price-small">R$ ${precoNumerico.toFixed(2)}</span>` :
+                        `<span class="item-price">R$ ${precoNumerico.toFixed(2)}</span>`
+                    }
+                </div>
+                <p class="item-description">${item.description || ''}</p>
+                <div class="item-footer">
+                    <span class="item-category">${item.category}</span>
+                    <button class="add-to-cart-btn" onclick="addToCart(${JSON.stringify({
+                        id: item.id,
+                        name: item.name,
+                        price: displayPrice,
+                        originalPrice: precoNumerico,
+                        image: imagemUrl
+                    }).replace(/"/g, '&quot;')})">
+                        <i class="fas fa-cart-plus"></i> Add
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        menuGrid.appendChild(card);
+    });
+}
 
         function renderSpecialsSection() {
             const specials = menuItems.filter(item => item.isSpecial);
@@ -1529,38 +1540,47 @@
             });
         }
 
-        function renderAdminItems() {
-            adminItemsContainer.innerHTML = '';
-            
-            if (menuItems.length === 0) {
-                adminItemsContainer.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum item cadastrado</p>';
-                return;
-            }
-            
-            menuItems.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'admin-item';
-                div.innerHTML = `
-                    <img src="${item.image || 'https://picsum.photos/80/80?random=' + item.id}" 
-                         class="admin-item-image"
-                         onerror="this.src='https://picsum.photos/80/80?random=1'">
-                    <div>
-                        <h4>${item.name}</h4>
-                        <p>R$ ${parseFloat(item.price).toFixed(2)}</p>
-                        ${item.isSpecial ? '<p style="color: var(--warning-color);">⭐ Prato do Dia</p>' : ''}
-                    </div>
-                    <div class="admin-item-actions">
-                        <button class="action-btn edit-btn" onclick="editarItem(${item.id})">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="action-btn delete-btn" onclick="deletarItem(${item.id})">
-                            <i class="fas fa-trash"></i> Excluir
-                        </button>
-                    </div>
-                `;
-                adminItemsContainer.appendChild(div);
-            });
+         function renderAdminItems() {
+    adminItemsContainer.innerHTML = '';
+    
+    if (menuItems.length === 0) {
+        adminItemsContainer.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum item cadastrado</p>';
+        return;
+    }
+    
+    menuItems.forEach(item => {
+        // CORREÇÃO: Mesma lógica para URLs de imagem
+        let imagemUrl = item.image || 'https://picsum.photos/80/80?random=' + item.id;
+        
+        if (imagemUrl.startsWith('http')) {
+            // URL completa, manter como está
+        } else {
+            imagemUrl = API_URL.replace('/api', '') + imagemUrl;
         }
+        
+        const div = document.createElement('div');
+        div.className = 'admin-item';
+        div.innerHTML = `
+            <img src="${imagemUrl}" 
+                 class="admin-item-image"
+                 onerror="this.src='https://picsum.photos/80/80?random=1'">
+            <div>
+                <h4>${item.name}</h4>
+                <p>R$ ${parseFloat(item.price).toFixed(2)}</p>
+                ${item.isSpecial ? '<p style="color: var(--warning-color);">⭐ Prato do Dia</p>' : ''}
+            </div>
+            <div class="admin-item-actions">
+                <button class="action-btn edit-btn" onclick="editarItem(${item.id})">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
+                <button class="action-btn delete-btn" onclick="deletarItem(${item.id})">
+                    <i class="fas fa-trash"></i> Excluir
+                </button>
+            </div>
+        `;
+        adminItemsContainer.appendChild(div);
+    });
+}
 
         function renderOrders() {
             ordersContainer.innerHTML = '';
