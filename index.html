@@ -1144,23 +1144,23 @@
                             <textarea id="itemDescription" rows="3"></textarea>
                         </div>
                         
+                        <!-- CAMPO DE URL DA IMAGEM -->
                         <div class="form-group">
-                            <label>Imagem do Item</label>
-                            <input type="file" id="itemImage" accept="image/*">
+                            <label>URL da Imagem (opcional)</label>
+                            <input type="url" id="itemImageUrl" placeholder="https://exemplo.com/imagem.jpg">
                             <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
-                                💡 Selecione uma imagem do seu computador (formatos: JPG, PNG, WEBP)
+                                💡 Cole aqui links de imagens do Unsplash, Pexels ou Imgur
                             </div>
                         </div>
-                       <!--Formulario de mandar urls--> 
-                       <div class="form-group">
-    <label>URL da Imagem (opcional)</label>
-    <input type="url" id="itemImageUrl" placeholder="https://exemplo.com/imagem.jpg">
-    <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
-        💡 Cole aqui links de imagens do Unsplash, Pexels ou Imgur
-    </div>
-</div>
-
-                       <!--fim do codigo-->
+                        
+                        <!-- CAMPO DE UPLOAD DE IMAGEM -->
+                        <div class="form-group">
+                            <label>Upload de Imagem (alternativa)</label>
+                            <input type="file" id="itemImage" accept="image/*">
+                            <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                                💡 Ou selecione uma imagem do seu computador (formatos: JPG, PNG, WEBP)
+                            </div>
+                        </div>
                         
                         <img id="imagePreview" class="image-preview" alt="Prévia da imagem">
                         
@@ -1250,8 +1250,6 @@
         let isLoggedIn = !!token;
         let editingItemId = null;
         let unreadOrders = 0;
-
-        const itemImageUrl = document.getElementById('itemImageUrl');
         
         const menuView = document.getElementById('menu-view');
         const adminPanel = document.getElementById('admin-panel');
@@ -1286,6 +1284,7 @@
         const itemPrice = document.getElementById('itemPrice');
         const itemDescription = document.getElementById('itemDescription');
         const itemImage = document.getElementById('itemImage');
+        const itemImageUrl = document.getElementById('itemImageUrl');
         const imagePreview = document.getElementById('imagePreview');
         const itemId = document.getElementById('itemId');
         const isSpecial = document.getElementById('isSpecial');
@@ -2099,26 +2098,7 @@
         };
 
         async function handleLoginSubmit(e) {
-            e.preventDefault(); 
-
-               // No início da função handleItemSubmit, após coletar os outros campos
-const imagemUrl = itemImageUrl ? itemImageUrl.value : '';
-
-const formData = new FormData();
-formData.append('nome', itemName.value);
-formData.append('categoria_id', itemCategory.value);
-formData.append('preco', itemPrice.value);
-formData.append('descricao', itemDescription.value || '');
-formData.append('is_special', isSpecial.checked);
-
-// PRIORIDADE: Se tiver URL, usa ela. Senão, tenta upload
-if (imagemUrl && imagemUrl.trim() !== '') {
-    formData.append('imagem', imagemUrl);
-    console.log('🔗 Usando URL:', imagemUrl);
-} else if (itemImage.files[0]) {
-    formData.append('imagem', itemImage.files[0]);
-    console.log('📸 Upload de arquivo:', itemImage.files[0].name);
-}
+            e.preventDefault();
             
             try {
                 const response = await fetch(`${API_URL}/login`, {
@@ -2146,136 +2126,150 @@ if (imagemUrl && imagemUrl.trim() !== '') {
         }
 
         async function handleItemSubmit(e) {
-    e.preventDefault();
-    
-    console.log('🚀 Enviando formulário...');
-    console.log('editingItemId:', editingItemId);
-    
-    // VALIDAÇÃO: Verificar campos obrigatórios
-    if (!itemName.value) {
-        showToast('Nome é obrigatório!', 'error');
-        return;
-    }
-    if (!itemCategory.value) {
-        showToast('Categoria é obrigatória!', 'error');
-        return;
-    }
-    if (!itemPrice.value) {
-        showToast('Preço é obrigatório!', 'error');
-        return;
-    }
-    
-    const formData = new FormData();
-    formData.append('nome', itemName.value);
-    formData.append('categoria_id', itemCategory.value);
-    formData.append('preco', itemPrice.value);
-    formData.append('descricao', itemDescription.value || '');
-    formData.append('is_special', isSpecial.checked);
-    
-    if (itemImage.files[0]) {
-        formData.append('imagem', itemImage.files[0]);
-        console.log('📸 Imagem selecionada:', itemImage.files[0].name);
-    } else {
-        console.log('📸 Nenhuma imagem selecionada');
-    }
-    
-    if (specialPrice.value) {
-        formData.append('preco_promocional', specialPrice.value);
-    }
-    
-    // Log dos dados enviados
-    console.log('📦 Dados a serem enviados:');
-    for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-    }
-    
-    try {
-        const url = editingItemId ? 
-            `${API_URL}/itens/${editingItemId}` : 
-            `${API_URL}/itens`;
-        
-        console.log('🔗 URL:', url);
-        console.log('📡 Método:', editingItemId ? 'PUT' : 'POST');
-        
-        const response = await fetch(url, {
-            method: editingItemId ? 'PUT' : 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
-            body: formData
-        });
-        
-        console.log('📊 Status da resposta:', response.status);
-        
-        const responseText = await response.text();
-        console.log('📄 Resposta:', responseText);
-        
-        if (response.ok) {
-            showToast(editingItemId ? 'Item atualizado!' : 'Item criado!');
-            itemForm.classList.remove('active');
-            await loadItens();
-        } else {
-            let errorMsg = responseText;
-            try {
-                const errorJson = JSON.parse(responseText);
-                errorMsg = errorJson.error || errorMsg;
-            } catch (e) {
-                // Não é JSON, mantém o texto
+            e.preventDefault();
+            
+            console.log('🚀 Enviando formulário...');
+            console.log('editingItemId:', editingItemId);
+            
+            // VALIDAÇÃO: Verificar campos obrigatórios
+            if (!itemName.value) {
+                showToast('Nome é obrigatório!', 'error');
+                return;
             }
-            showToast('Erro: ' + errorMsg, 'error');
+            if (!itemCategory.value) {
+                showToast('Categoria é obrigatória!', 'error');
+                return;
+            }
+            if (!itemPrice.value) {
+                showToast('Preço é obrigatório!', 'error');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('nome', itemName.value);
+            formData.append('categoria_id', itemCategory.value);
+            formData.append('preco', itemPrice.value);
+            formData.append('descricao', itemDescription.value || '');
+            formData.append('is_special', isSpecial.checked);
+            
+            // PRIORIDADE 1: Verificar se tem URL da imagem
+            const imagemUrl = itemImageUrl ? itemImageUrl.value : '';
+            
+            if (imagemUrl && imagemUrl.trim() !== '') {
+                formData.append('imagem', imagemUrl);
+                console.log('🔗 Usando URL:', imagemUrl);
+            } 
+            // PRIORIDADE 2: Se não tiver URL, verificar upload
+            else if (itemImage.files[0]) {
+                formData.append('imagem', itemImage.files[0]);
+                console.log('📸 Upload de arquivo:', itemImage.files[0].name);
+            } else {
+                console.log('📸 Nenhuma imagem selecionada');
+            }
+            
+            if (specialPrice.value) {
+                formData.append('preco_promocional', specialPrice.value);
+            }
+            
+            // Log dos dados enviados
+            console.log('📦 Dados a serem enviados:');
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+            
+            try {
+                const url = editingItemId ? 
+                    `${API_URL}/itens/${editingItemId}` : 
+                    `${API_URL}/itens`;
+                
+                console.log('🔗 URL da requisição:', url);
+                console.log('📡 Método:', editingItemId ? 'PUT' : 'POST');
+                
+                const response = await fetch(url, {
+                    method: editingItemId ? 'PUT' : 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                
+                console.log('📊 Status da resposta:', response.status);
+                
+                const responseText = await response.text();
+                console.log('📄 Resposta:', responseText);
+                
+                if (response.ok) {
+                    showToast(editingItemId ? 'Item atualizado!' : 'Item criado!');
+                    itemForm.classList.remove('active');
+                    await loadItens();
+                } else {
+                    let errorMsg = responseText;
+                    try {
+                        const errorJson = JSON.parse(responseText);
+                        errorMsg = errorJson.error || errorMsg;
+                    } catch (e) {
+                        // Não é JSON, mantém o texto
+                    }
+                    showToast('Erro: ' + errorMsg, 'error');
+                }
+            } catch (error) {
+                console.error('❌ Erro na requisição:', error);
+                showToast('Erro ao salvar: ' + error.message, 'error');
+            }
         }
-    } catch (error) {
-        console.error('❌ Erro na requisição:', error);
-        showToast('Erro ao salvar: ' + error.message, 'error');
-    }
-}
 
-      window.editarItem = function(id) {
-    const item = menuItems.find(i => i.id === id);
-    if (!item) {
-        console.error('❌ Item não encontrado:', id);
-        return;
-    }
-    
-    console.log('📝 EDITANDO ITEM:', item);
-    editingItemId = id;
-    
-    // Preencher o formulário
-    itemName.value = item.name || '';
-    console.log('Nome preenchido:', itemName.value);
-    
-    // Encontrar o ID da categoria pelo nome
-    const categoria = categorias.find(c => c.nome === item.category);
-    if (categoria) {
-        itemCategory.value = categoria.id;
-        console.log('Categoria ID:', categoria.id);
-    } else {
-        console.warn('Categoria não encontrada para:', item.category);
-    }
-    
-    itemPrice.value = item.price || '';
-    console.log('Preço:', itemPrice.value);
-    
-    itemDescription.value = item.description || '';
-    
-    // Limpar preview de imagem
-    imagePreview.classList.remove('active');
-    imagePreview.src = '';
-    
-    isSpecial.checked = item.isSpecial || false;
-    
-    if (item.isSpecial && item.specialPrice) {
-        specialPriceGroup.classList.add('active');
-        specialPrice.value = item.specialPrice;
-    } else {
-        specialPriceGroup.classList.remove('active');
-        specialPrice.value = '';
-    }
-    
-    formTitle.textContent = 'Editar Item';
-    itemForm.classList.add('active');
-    
-    // Rolar para o formulário
-    itemForm.scrollIntoView({ behavior: 'smooth' });
-};
+        window.editarItem = function(id) {
+            const item = menuItems.find(i => i.id === id);
+            if (!item) {
+                console.error('❌ Item não encontrado:', id);
+                return;
+            }
+            
+            console.log('📝 EDITANDO ITEM:', item);
+            editingItemId = id;
+            
+            // Preencher o formulário
+            itemName.value = item.name || '';
+            console.log('Nome preenchido:', itemName.value);
+            
+            // Encontrar o ID da categoria pelo nome
+            const categoria = categorias.find(c => c.nome === item.category);
+            if (categoria) {
+                itemCategory.value = categoria.id;
+                console.log('Categoria ID:', categoria.id);
+            } else {
+                console.warn('Categoria não encontrada para:', item.category);
+            }
+            
+            itemPrice.value = item.price || '';
+            console.log('Preço:', itemPrice.value);
+            
+            itemDescription.value = item.description || '';
+            
+            // Se o item tem URL, mostrar no campo de URL
+            if (item.image && item.image.startsWith('http')) {
+                itemImageUrl.value = item.image;
+                imagePreview.src = item.image;
+                imagePreview.classList.add('active');
+            } else {
+                itemImageUrl.value = '';
+                imagePreview.classList.remove('active');
+            }
+            
+            isSpecial.checked = item.isSpecial || false;
+            
+            if (item.isSpecial && item.specialPrice) {
+                specialPriceGroup.classList.add('active');
+                specialPrice.value = item.specialPrice;
+            } else {
+                specialPriceGroup.classList.remove('active');
+                specialPrice.value = '';
+            }
+            
+            formTitle.textContent = 'Editar Item';
+            itemForm.classList.add('active');
+            
+            // Rolar para o formulário
+            itemForm.scrollIntoView({ behavior: 'smooth' });
+        };
 
         window.deletarItem = async function(id) {
             if (!confirm('Tem certeza que deseja excluir este item?')) return;
@@ -2362,6 +2356,7 @@ if (imagemUrl && imagemUrl.trim() !== '') {
                 editingItemId = null;
                 itemFormElement.reset();
                 imagePreview.classList.remove('active');
+                itemImageUrl.value = '';
                 formTitle.textContent = 'Novo Item';
                 itemForm.classList.add('active');
             });
@@ -2395,6 +2390,13 @@ if (imagemUrl && imagemUrl.trim() !== '') {
                         imagePreview.classList.add('active');
                     };
                     reader.readAsDataURL(file);
+                }
+            });
+            
+            itemImageUrl.addEventListener('input', function() {
+                if (this.value) {
+                    imagePreview.src = this.value;
+                    imagePreview.classList.add('active');
                 }
             });
             
