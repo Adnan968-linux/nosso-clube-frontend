@@ -1152,16 +1152,13 @@
                             </div>
                         </div>
                        <!--Formulario de mandar urls--> 
-
                        <div class="form-group">
     <label>URL da Imagem (opcional)</label>
     <input type="url" id="itemImageUrl" placeholder="https://exemplo.com/imagem.jpg">
-    <div class="image-url-example">
-        💡 Dica: Use URLs do Unsplash, Pexels ou Imgur
+    <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+        💡 Cole aqui links de imagens do Unsplash, Pexels ou Imgur
     </div>
 </div>
-
-
 
                        <!--fim do codigo-->
                         
@@ -1253,6 +1250,8 @@
         let isLoggedIn = !!token;
         let editingItemId = null;
         let unreadOrders = 0;
+
+        const itemImageUrl = document.getElementById('itemImageUrl');
         
         const menuView = document.getElementById('menu-view');
         const adminPanel = document.getElementById('admin-panel');
@@ -2100,7 +2099,26 @@
         };
 
         async function handleLoginSubmit(e) {
-            e.preventDefault();
+            e.preventDefault(); 
+
+               // No início da função handleItemSubmit, após coletar os outros campos
+const imagemUrl = itemImageUrl ? itemImageUrl.value : '';
+
+const formData = new FormData();
+formData.append('nome', itemName.value);
+formData.append('categoria_id', itemCategory.value);
+formData.append('preco', itemPrice.value);
+formData.append('descricao', itemDescription.value || '');
+formData.append('is_special', isSpecial.checked);
+
+// PRIORIDADE: Se tiver URL, usa ela. Senão, tenta upload
+if (imagemUrl && imagemUrl.trim() !== '') {
+    formData.append('imagem', imagemUrl);
+    console.log('🔗 Usando URL:', imagemUrl);
+} else if (itemImage.files[0]) {
+    formData.append('imagem', itemImage.files[0]);
+    console.log('📸 Upload de arquivo:', itemImage.files[0].name);
+}
             
             try {
                 const response = await fetch(`${API_URL}/login`, {
