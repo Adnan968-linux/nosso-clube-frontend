@@ -2115,86 +2115,136 @@
         }
 
         async function handleItemSubmit(e) {
-            e.preventDefault();
-            
-            const formData = new FormData();
-            formData.append('nome', itemName.value);
-            formData.append('categoria_id', itemCategory.value);
-            formData.append('preco', itemPrice.value);
-            formData.append('descricao', itemDescription.value);
-            formData.append('is_special', isSpecial.checked);
-            
-            if (itemImage.files[0]) {
-                formData.append('imagem', itemImage.files[0]);
-            }
-            
-            if (specialPrice.value) {
-                formData.append('preco_promocional', specialPrice.value);
-            }
-            
+    e.preventDefault();
+    
+    console.log('🚀 Enviando formulário...');
+    console.log('editingItemId:', editingItemId);
+    
+    // VALIDAÇÃO: Verificar campos obrigatórios
+    if (!itemName.value) {
+        showToast('Nome é obrigatório!', 'error');
+        return;
+    }
+    if (!itemCategory.value) {
+        showToast('Categoria é obrigatória!', 'error');
+        return;
+    }
+    if (!itemPrice.value) {
+        showToast('Preço é obrigatório!', 'error');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('nome', itemName.value);
+    formData.append('categoria_id', itemCategory.value);
+    formData.append('preco', itemPrice.value);
+    formData.append('descricao', itemDescription.value || '');
+    formData.append('is_special', isSpecial.checked);
+    
+    if (itemImage.files[0]) {
+        formData.append('imagem', itemImage.files[0]);
+        console.log('📸 Imagem selecionada:', itemImage.files[0].name);
+    } else {
+        console.log('📸 Nenhuma imagem selecionada');
+    }
+    
+    if (specialPrice.value) {
+        formData.append('preco_promocional', specialPrice.value);
+    }
+    
+    // Log dos dados enviados
+    console.log('📦 Dados a serem enviados:');
+    for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+    }
+    
+    try {
+        const url = editingItemId ? 
+            `${API_URL}/itens/${editingItemId}` : 
+            `${API_URL}/itens`;
+        
+        console.log('🔗 URL:', url);
+        console.log('📡 Método:', editingItemId ? 'PUT' : 'POST');
+        
+        const response = await fetch(url, {
+            method: editingItemId ? 'PUT' : 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        });
+        
+        console.log('📊 Status da resposta:', response.status);
+        
+        const responseText = await response.text();
+        console.log('📄 Resposta:', responseText);
+        
+        if (response.ok) {
+            showToast(editingItemId ? 'Item atualizado!' : 'Item criado!');
+            itemForm.classList.remove('active');
+            await loadItens();
+        } else {
+            let errorMsg = responseText;
             try {
-                const url = editingItemId ? 
-                    `${API_URL}/itens/${editingItemId}` : 
-                    `${API_URL}/itens`;
-                
-                const response = await fetch(url, {
-                    method: editingItemId ? 'PUT' : 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: formData
-                });
-                
-                if (response.ok) {
-                    showToast(editingItemId ? 'Item atualizado!' : 'Item criado!');
-                    itemForm.classList.remove('active');
-                    await loadItens();
-                } else {
-                    const error = await response.text();
-                    showToast('Erro: ' + error, 'error');
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-                showToast('Erro ao salvar', 'error');
+                const errorJson = JSON.parse(responseText);
+                errorMsg = errorJson.error || errorMsg;
+            } catch (e) {
+                // Não é JSON, mantém o texto
             }
+            showToast('Erro: ' + errorMsg, 'error');
         }
+    } catch (error) {
+        console.error('❌ Erro na requisição:', error);
+        showToast('Erro ao salvar: ' + error.message, 'error');
+    }
+}
 
-        window.editarItem = function(id) {
-            const item = menuItems.find(i => i.id === id);
-            if (!item) {
-                console.error('Item não encontrado:', id);
-                return;
-            }
-            
-            console.log('Editando item:', item);
-            editingItemId = id;
-            
-            itemName.value = item.name || '';
-            
-            const categoria = categorias.find(c => c.nome === item.category);
-            if (categoria) {
-                itemCategory.value = categoria.id;
-            }
-            
-            itemPrice.value = item.price || '';
-            itemDescription.value = item.description || '';
-            
-            imagePreview.classList.remove('active');
-            imagePreview.src = '';
-            
-            isSpecial.checked = item.isSpecial || false;
-            
-            if (item.isSpecial && item.specialPrice) {
-                specialPriceGroup.classList.add('active');
-                specialPrice.value = item.specialPrice;
-            } else {
-                specialPriceGroup.classList.remove('active');
-                specialPrice.value = '';
-            }
-            
-            formTitle.textContent = 'Editar Item';
-            itemForm.classList.add('active');
-            
-            itemForm.scrollIntoView({ behavior: 'smooth' });
-        };
+      window.editarItem = function(id) {
+    const item = menuItems.find(i => i.id === id);
+    if (!item) {
+        console.error('❌ Item não encontrado:', id);
+        return;
+    }
+    
+    console.log('📝 EDITANDO ITEM:', item);
+    editingItemId = id;
+    
+    // Preencher o formulário
+    itemName.value = item.name || '';
+    console.log('Nome preenchido:', itemName.value);
+    
+    // Encontrar o ID da categoria pelo nome
+    const categoria = categorias.find(c => c.nome === item.category);
+    if (categoria) {
+        itemCategory.value = categoria.id;
+        console.log('Categoria ID:', categoria.id);
+    } else {
+        console.warn('Categoria não encontrada para:', item.category);
+    }
+    
+    itemPrice.value = item.price || '';
+    console.log('Preço:', itemPrice.value);
+    
+    itemDescription.value = item.description || '';
+    
+    // Limpar preview de imagem
+    imagePreview.classList.remove('active');
+    imagePreview.src = '';
+    
+    isSpecial.checked = item.isSpecial || false;
+    
+    if (item.isSpecial && item.specialPrice) {
+        specialPriceGroup.classList.add('active');
+        specialPrice.value = item.specialPrice;
+    } else {
+        specialPriceGroup.classList.remove('active');
+        specialPrice.value = '';
+    }
+    
+    formTitle.textContent = 'Editar Item';
+    itemForm.classList.add('active');
+    
+    // Rolar para o formulário
+    itemForm.scrollIntoView({ behavior: 'smooth' });
+};
 
         window.deletarItem = async function(id) {
             if (!confirm('Tem certeza que deseja excluir este item?')) return;
