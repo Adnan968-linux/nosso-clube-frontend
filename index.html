@@ -1569,108 +1569,113 @@
             });
         }
 
-        function renderOrders() {
-            ordersContainer.innerHTML = '';
-            
-            if (orders.length === 0) {
-                ordersContainer.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum pedido recebido</p>';
-                return;
-            }
-            
-            orders.forEach(order => {
-                const div = document.createElement('div');
-                div.className = 'order-card';
-                div.setAttribute('data-pedido-id', order.id);
+       function renderOrders() {
+    ordersContainer.innerHTML = '';
+    
+    if (orders.length === 0) {
+        ordersContainer.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum pedido recebido</p>';
+        return;
+    }
+    
+    orders.forEach(order => {
+        const div = document.createElement('div');
+        div.className = 'order-card';
+        div.setAttribute('data-pedido-id', order.id);
+        
+        let statusClass = '';
+        let statusText = '';
+        
+        switch(order.status) {
+            case 'pending':
+                statusClass = 'status-pending';
+                statusText = '⏳ Pendente';
+                break;
+            case 'preparing':
+                statusClass = 'status-preparing';
+                statusText = '👨‍🍳 Preparando';
+                break;
+            case 'delivered':
+                statusClass = 'status-delivered';
+                statusText = '✅ Finalizado';
+                break;
+            default:
+                statusClass = 'status-pending';
+                statusText = '⏳ Pendente';
+        }
+        
+        // CORREÇÃO: Buscar o nome do item no menuItems
+        let itemsHtml = '';
+        if (order.itens && order.itens.length > 0) {
+            itemsHtml = order.itens.map(item => {
+                const quantidade = item.quantidade || 1;
                 
-                let statusClass = '';
-                let statusText = '';
+                // Tentar encontrar o item no menuItems pelo ID
+                const menuItem = menuItems.find(mi => mi.id === item.item_id);
+                const nomeItem = menuItem ? menuItem.name : `Item #${item.item_id}`;
                 
-                switch(order.status) {
-                    case 'pending':
-                        statusClass = 'status-pending';
-                        statusText = '⏳ Pendente';
-                        break;
-                    case 'preparing':
-                        statusClass = 'status-preparing';
-                        statusText = '👨‍🍳 Preparando';
-                        break;
-                    case 'delivered':
-                        statusClass = 'status-delivered';
-                        statusText = '✅ Finalizado';
-                        break;
-                    default:
-                        statusClass = 'status-pending';
-                        statusText = '⏳ Pendente';
-                }
+                const precoUnitario = parseFloat(item.preco_unitario || 0);
+                const subtotal = parseFloat(item.subtotal || precoUnitario * quantidade);
                 
-                let itemsHtml = '';
-                if (order.itens && order.itens.length > 0) {
-                    itemsHtml = order.itens.map(item => {
-                        const quantidade = item.quantidade || 1;
-                        const nome = item.nome || `Item #${item.item_id || 'desconhecido'}`;
-                        const precoUnitario = parseFloat(item.preco_unitario || 0);
-                        const subtotal = parseFloat(item.subtotal || precoUnitario * quantidade);
-                        
-                        return `
-                            <div class="order-item-row">
-                                <span>${quantidade}x ${nome}</span>
-                                <span>R$ ${subtotal.toFixed(2)}</span>
-                            </div>
-                        `;
-                    }).join('');
-                } else {
-                    itemsHtml = '<p class="order-item-row">Itens não disponíveis</p>';
-                }
-                
-                div.innerHTML = `
-                    <div class="order-header">
-                        <div>
-                            <span class="order-id">Pedido #${order.numero_pedido || order.id}</span>
-                            <span class="order-time">${order.created_at ? new Date(order.created_at).toLocaleString() : 'Agora mesmo'}</span>
-                        </div>
-                        <span class="order-status ${statusClass}">${statusText}</span>
-                    </div>
-                    
-                    <div class="customer-info">
-                        <p><i class="fas fa-user"></i> <strong>Cliente:</strong> ${order.cliente_nome || 'Cliente'}</p>
-                        <p><i class="fas fa-phone"></i> <strong>WhatsApp:</strong> ${order.cliente_telefone || '---'}</p>
-                    </div>
-                    
-                    <div class="order-items">
-                        <h4>Itens do Pedido:</h4>
-                        ${itemsHtml}
-                    </div>
-                    
-                    <div class="order-total">
-                        Total: R$ ${parseFloat(order.total || 0).toFixed(2)}
-                    </div>
-                    
-                    <div class="order-actions" style="display: flex; gap: 10px; justify-content: space-between; margin-top: 15px; flex-wrap: wrap;">
-                        <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            <button class="action-btn status-btn pending-btn" onclick="atualizarStatusPedido(${order.id}, 'pending')" ${order.status === 'pending' ? 'disabled' : ''}>
-                                ⏳ Pendente
-                            </button>
-                            <button class="action-btn status-btn preparing-btn" onclick="atualizarStatusPedido(${order.id}, 'preparing')" ${order.status === 'preparing' ? 'disabled' : ''}>
-                                👨‍🍳 Preparando
-                            </button>
-                            <button class="action-btn status-btn delivered-btn" onclick="atualizarStatusPedido(${order.id}, 'delivered')" ${order.status === 'delivered' ? 'disabled' : ''}>
-                                ✅ Finalizado
-                            </button>
-                        </div>
-                        <div style="display: flex; gap: 5px;">
-                            <button class="action-btn print-btn" onclick="imprimirPedido(${order.id})">
-                                <i class="fas fa-print"></i> Imprimir
-                            </button>
-                            <button class="action-btn delete-btn" onclick="excluirPedido(${order.id})">
-                                <i class="fas fa-trash"></i> Excluir
-                            </button>
-                        </div>
+                return `
+                    <div class="order-item-row">
+                        <span>${quantidade}x ${nomeItem}</span>
+                        <span>R$ ${subtotal.toFixed(2)}</span>
                     </div>
                 `;
-                
-                ordersContainer.appendChild(div);
-            });
+            }).join('');
+        } else {
+            itemsHtml = '<p class="order-item-row">Itens não disponíveis</p>';
         }
+        
+        div.innerHTML = `
+            <div class="order-header">
+                <div>
+                    <span class="order-id">Pedido #${order.numero_pedido || order.id}</span>
+                    <span class="order-time">${order.created_at ? new Date(order.created_at).toLocaleString('pt-BR') : 'Agora mesmo'}</span>
+                </div>
+                <span class="order-status ${statusClass}">${statusText}</span>
+            </div>
+            
+            <div class="customer-info">
+                <p><i class="fas fa-user"></i> <strong>Cliente:</strong> ${order.cliente_nome || 'Cliente'}</p>
+                <p><i class="fas fa-phone"></i> <strong>WhatsApp:</strong> ${order.cliente_telefone || '---'}</p>
+            </div>
+            
+            <div class="order-items">
+                <h4>Itens do Pedido:</h4>
+                ${itemsHtml}
+            </div>
+            
+            <div class="order-total">
+                Total: R$ ${parseFloat(order.total || 0).toFixed(2)}
+            </div>
+            
+            <div class="order-actions" style="display: flex; gap: 10px; justify-content: space-between; margin-top: 15px; flex-wrap: wrap;">
+                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                    <button class="action-btn status-btn pending-btn" onclick="atualizarStatusPedido(${order.id}, 'pending')" ${order.status === 'pending' ? 'disabled' : ''}>
+                        ⏳ Pendente
+                    </button>
+                    <button class="action-btn status-btn preparing-btn" onclick="atualizarStatusPedido(${order.id}, 'preparing')" ${order.status === 'preparing' ? 'disabled' : ''}>
+                        👨‍🍳 Preparando
+                    </button>
+                    <button class="action-btn status-btn delivered-btn" onclick="atualizarStatusPedido(${order.id}, 'delivered')" ${order.status === 'delivered' ? 'disabled' : ''}>
+                        ✅ Finalizado
+                    </button>
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button class="action-btn print-btn" onclick="imprimirPedido(${order.id})">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <button class="action-btn delete-btn" onclick="excluirPedido(${order.id})">
+                        <i class="fas fa-trash"></i> Excluir
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        ordersContainer.appendChild(div);
+    });
+}
 
         function renderSpecialsAdmin() {
             specialsAdminContainer.innerHTML = '';
@@ -2016,86 +2021,92 @@
         };
 
         window.imprimirPedido = function(orderId) {
-            const order = orders.find(o => o.id === orderId);
-            if (!order) return;
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    const printWindow = window.open('', '_blank');
+    
+    let itemsHtml = '';
+    if (order.itens && order.itens.length > 0) {
+        itemsHtml = order.itens.map(item => {
+            const quantidade = item.quantidade || 1;
             
-            const printWindow = window.open('', '_blank');
+            // Buscar o nome do item no menuItems
+            const menuItem = menuItems.find(mi => mi.id === item.item_id);
+            const nomeItem = menuItem ? menuItem.name : `Item #${item.item_id}`;
             
-            let itemsHtml = '';
-            if (order.itens && order.itens.length > 0) {
-                itemsHtml = order.itens.map(item => {
-                    const quantidade = item.quantidade || 1;
-                    const nome = item.nome || `Item #${item.item_id || 'desconhecido'}`;
-                    const precoUnitario = parseFloat(item.preco_unitario || 0);
-                    const subtotal = parseFloat(item.subtotal || precoUnitario * quantidade);
-                    
-                    return `
-                        <tr>
-                            <td>${nome}</td>
-                            <td>${quantidade}</td>
-                            <td>R$ ${precoUnitario.toFixed(2)}</td>
-                            <td>R$ ${subtotal.toFixed(2)}</td>
-                        </tr>
-                    `;
-                }).join('');
-            } else {
-                itemsHtml = '<tr><td colspan="4">Itens não disponíveis</td></tr>';
-            }
+            const precoUnitario = parseFloat(item.preco_unitario || 0);
+            const subtotal = parseFloat(item.subtotal || precoUnitario * quantidade);
             
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>Pedido #${order.numero_pedido || order.id}</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; padding: 20px; }
-                        h1 { color: #8e44ad; text-align: center; }
-                        .info { margin: 20px 0; padding: 10px; background: #f5f5f5; border-radius: 5px; }
-                        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-                        th { background: #8e44ad; color: white; padding: 10px; }
-                        td { padding: 10px; border-bottom: 1px solid #ddd; }
-                        .total { font-size: 1.2rem; font-weight: bold; text-align: right; margin-top: 20px; }
-                        .footer { text-align: center; margin-top: 30px; color: #666; }
-                    </style>
-                </head>
-                <body>
-                    <h1>Nosso Clube</h1>
-                    <h2>Pedido #${order.numero_pedido || order.id}</h2>
-                    
-                    <div class="info">
-                        <p><strong>Cliente:</strong> ${order.cliente_nome || 'Cliente'}</p>
-                        <p><strong>WhatsApp:</strong> ${order.cliente_telefone || '---'}</p>
-                        <p><strong>Data:</strong> ${order.created_at ? new Date(order.created_at).toLocaleString() : 'Agora mesmo'}</p>
-                        <p><strong>Status:</strong> ${order.status || 'Pendente'}</p>
-                    </div>
-                    
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Item</th>
-                                <th>Qtd</th>
-                                <th>Preço</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${itemsHtml}
-                        </tbody>
-                    </table>
-                    
-                    <div class="total">
-                        Total: R$ ${parseFloat(order.total || 0).toFixed(2)}
-                    </div>
-                    
-                    <div class="footer">
-                        <p>Obrigado pela preferência!</p>
-                    </div>
-                </body>
-                </html>
-            `);
+            return `
+                <tr>
+                    <td>${nomeItem}</td>
+                    <td>${quantidade}</td>
+                    <td>R$ ${precoUnitario.toFixed(2)}</td>
+                    <td>R$ ${subtotal.toFixed(2)}</td>
+                </tr>
+            `;
+        }).join('');
+    } else {
+        itemsHtml = '<tr><td colspan="4">Itens não disponíveis</td></tr>';
+    }
+    
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Pedido #${order.numero_pedido || order.id}</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h1 { color: #8e44ad; text-align: center; }
+                .info { margin: 20px 0; padding: 10px; background: #f5f5f5; border-radius: 5px; }
+                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                th { background: #8e44ad; color: white; padding: 10px; }
+                td { padding: 10px; border-bottom: 1px solid #ddd; }
+                .total { font-size: 1.2rem; font-weight: bold; text-align: right; margin-top: 20px; }
+                .footer { text-align: center; margin-top: 30px; color: #666; }
+            </style>
+        </head>
+        <body>
+            <h1>Nosso Clube</h1>
+            <h2>Pedido #${order.numero_pedido || order.id}</h2>
             
-            printWindow.document.close();
-            printWindow.print();
-        };
+            <div class="info">
+                <p><strong>Cliente:</strong> ${order.cliente_nome || 'Cliente'}</p>
+                <p><strong>WhatsApp:</strong> ${order.cliente_telefone || '---'}</p>
+                <p><strong>Data:</strong> ${order.created_at ? new Date(order.created_at).toLocaleString('pt-BR') : 'Agora mesmo'}</p>
+                <p><strong>Status:</strong> ${order.status || 'Pendente'}</p>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Qtd</th>
+                        <th>Preço</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itemsHtml}
+                </tbody>
+            </table>
+            
+            <div class="total">
+                Total: R$ ${parseFloat(order.total || 0).toFixed(2)}
+            </div>
+            
+            <div class="footer">
+                <p>Obrigado pela preferência!</p>
+            </div>
+            <script>
+                window.onload = () => window.print();
+            <\/script>
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+};
 
         async function handleLoginSubmit(e) {
             e.preventDefault();
