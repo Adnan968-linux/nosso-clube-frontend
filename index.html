@@ -1018,6 +1018,48 @@
             animation: slideIn 0.3s ease-out;
             max-width: 350px;
         }
+        /* Estilos para opções de pagamento */
+.pagamento-option {
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.pagamento-option.selected {
+    background-color: var(--club-color);
+    color: white;
+    border-color: var(--club-color);
+}
+
+.pagamento-option.selected input {
+    accent-color: white;
+}
+
+/* Badge de pagamento nos pedidos */
+.pagamento-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.pagamento-badge.pix {
+    background-color: #32CD32;
+    color: white;
+}
+
+.pagamento-badge.dinheiro {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.pagamento-badge.cartao {
+    background-color: #2196F3;
+    color: white;
+}
     </style>
 </head>
 <body>
@@ -1093,6 +1135,33 @@
                         <button type="submit" class="checkout-btn" id="checkoutBtn" disabled>
                             Finalizar Pedido
                         </button>
+
+                        <!-- Opções de Pagamento -->
+<div class="form-group">
+    <label style="display: block; margin-bottom: 10px; font-weight: 600;">
+        💳 Forma de Pagamento
+    </label>
+    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 15px; background: #f0f0f0; border-radius: 8px; border: 2px solid transparent;">
+            <input type="radio" name="pagamento" value="pix" required>
+            📱 PIX
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 15px; background: #f0f0f0; border-radius: 8px; border: 2px solid transparent;">
+            <input type="radio" name="pagamento" value="dinheiro" required>
+            💰 Dinheiro
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 15px; background: #f0f0f0; border-radius: 8px; border: 2px solid transparent;">
+            <input type="radio" name="pagamento" value="cartao" required>
+            💳 Cartão
+        </label>
+    </div>
+</div>
+
+<!-- Observação (opcional) -->
+<div class="form-group" id="observacaoGroup" style="display: none;">
+    <label>Observação (opcional)</label>
+    <textarea id="observacao" rows="2" placeholder="Ex: Troco para R$ 50,00, sem cebola, etc..."></textarea>
+</div>
                     </form>
                 </div>
             </div>
@@ -1675,6 +1744,12 @@
         
         ordersContainer.appendChild(div);
     });
+// Dentro do div.innerHTML, após o customer-info, adicione:
+<div class="pagamento-info" style="margin: 10px 0; padding: 8px; background: #f5f5f5; border-radius: 5px;">
+    <p><strong>💳 Forma de Pagamento:</strong> <span class="pagamento-badge ${order.forma_pagamento ? order.forma_pagamento.toLowerCase().includes('pix') ? 'pix' : order.forma_pagamento.toLowerCase().includes('dinheiro') ? 'dinheiro' : 'cartao' : ''}">${order.forma_pagamento || 'Não informado'}</span></p>
+    ${order.observacao ? `<p><strong>📝 Observação:</strong> ${order.observacao}</p>` : ''}
+</div>
+
 }
 
         function renderSpecialsAdmin() {
@@ -1807,72 +1882,98 @@
         }
 
         async function checkout(e) {
-            e.preventDefault();
+    e.preventDefault();
+    
+    if (!customerName.value || !customerPhone.value) {
+        showToast('Preencha nome e WhatsApp!', 'error');
+        return;
+    }
+    
+    // Verificar se uma forma de pagamento foi selecionada
+    const pagamentoSelecionado = document.querySelector('input[name="pagamento"]:checked');
+    if (!pagamentoSelecionado) {
+        showToast('Selecione uma forma de pagamento!', 'error');
+        return;
+    }
+    
+    const formaPagamento = pagamentoSelecionado.value;
+    const observacao = document.getElementById('observacao').value;
+    
+    // Mapear emoji para exibição
+    const pagamentoEmoji = {
+        'pix': '📱 PIX',
+        'dinheiro': '💰 Dinheiro',
+        'cartao': '💳 Cartão'
+    };
+    
+    try {
+        const response = await fetch(`${API_URL}/pedidos`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cliente_nome: customerName.value,
+                cliente_telefone: customerPhone.value,
+                items: cart.map(item => ({
+                    id: item.id,
+                    quantity: item.quantity,
+                    price: item.price,
+                    name: item.name
+                })),
+                forma_pagamento: pagamentoEmoji[formaPagamento],
+                observacao: observacao || ''
+            })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
             
-            if (!customerName.value || !customerPhone.value) {
-                showToast('Preencha nome e WhatsApp!', 'error');
-                return;
+            const novoPedido = {
+                id: Date.now(),
+                numero_pedido: data.numero_pedido,
+                cliente_nome: customerName.value,
+                cliente_telefone: customerPhone.value,
+                total: data.total,
+                status: 'pending',
+                created_at: new Date().toISOString(),
+                forma_pagamento: pagamentoEmoji[formaPagamento],
+                observacao: observacao || '',
+                itens: cart.map(item => ({
+                    nome: item.name,
+                    quantidade: item.quantity,
+                    preco_unitario: item.price,
+                    subtotal: item.price * item.quantity
+                }))
+            };
+            
+            orders.unshift(novoPedido);
+            
+            if (isLoggedIn) {
+                mostrarNotificacaoPedido(novoPedido);
+                renderOrders();
             }
             
-            try {
-                const response = await fetch(`${API_URL}/pedidos`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        cliente_nome: customerName.value,
-                        cliente_telefone: customerPhone.value,
-                        items: cart.map(item => ({
-                            id: item.id,
-                            quantity: item.quantity,
-                            price: item.price,
-                            name: item.name
-                        }))
-                    })
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    const novoPedido = {
-                        id: Date.now(),
-                        numero_pedido: data.numero_pedido,
-                        cliente_nome: customerName.value,
-                        cliente_telefone: customerPhone.value,
-                        total: data.total,
-                        status: 'pending',
-                        created_at: new Date().toISOString(),
-                        itens: cart.map(item => ({
-                            nome: item.name,
-                            quantidade: item.quantity,
-                            preco_unitario: item.price,
-                            subtotal: item.price * item.quantity
-                        }))
-                    };
-                    
-                    orders.unshift(novoPedido);
-                    
-                    if (isLoggedIn) {
-                        mostrarNotificacaoPedido(novoPedido);
-                        renderOrders();
-                    }
-                    
-                    unreadOrders++;
-                    
-                    showToast(`Pedido #${data.numero_pedido} realizado!`, 'success');
-                    
-                    cart = [];
-                    updateCart();
-                    checkoutForm.reset();
-                    
-                } else {
-                    const error = await response.text();
-                    showToast('Erro no pedido: ' + error, 'error');
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-                showToast('Erro de conexão', 'error');
-            }
+            unreadOrders++;
+            
+            showToast(`Pedido #${data.numero_pedido} realizado! Forma de pagamento: ${pagamentoEmoji[formaPagamento]}`, 'success');
+            
+            cart = [];
+            updateCart();
+            checkoutForm.reset();
+            
+            // Resetar opções de pagamento
+            document.querySelectorAll('input[name="pagamento"]').forEach(r => r.checked = false);
+            document.getElementById('observacao').value = '';
+            
+        } else {
+            const error = await response.text();
+            showToast('Erro no pedido: ' + error, 'error');
         }
+    } catch (error) {
+        console.error('Erro:', error);
+        showToast('Erro de conexão', 'error');
+    }
+}
+     
 
         function mostrarNotificacaoPedido(pedido) {
             const notificacao = document.createElement('div');
@@ -2105,7 +2206,7 @@
         </html>
     `);
     
-    printWindow.document.close();
+     printWindow.document.close();
 };
 
         async function handleLoginSubmit(e) {
@@ -2413,6 +2514,18 @@
             
             itemFormElement.addEventListener('submit', handleItemSubmit);
             loginForm.addEventListener('submit', handleLoginSubmit);
+
+            // Mostrar campo de observação quando selecionar pagamento
+document.querySelectorAll('input[name="pagamento"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const observacaoGroup = document.getElementById('observacaoGroup');
+        if (this.value === 'dinheiro') {
+            observacaoGroup.style.display = 'block';
+        } else {
+            observacaoGroup.style.display = 'none';
+        }
+    });
+});
         }
 
         async function init() {
