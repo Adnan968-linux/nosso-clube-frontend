@@ -1129,40 +1129,41 @@
                         </div>
                     </div>
                     
-                    <form id="checkoutForm">
-                        <input type="text" id="customerName" placeholder="Seu nome" required>
-                        <input type="tel" id="customerPhone" placeholder="WhatsApp" required>
-                        <button type="submit" class="checkout-btn" id="checkoutBtn" disabled>
-                            Finalizar Pedido
-                        </button>
+                   <form id="checkoutForm">
+    <!-- DADOS DO CLIENTE -->
+    <input type="text" id="customerName" placeholder="Seu nome" required>
+    <input type="tel" id="customerPhone" placeholder="WhatsApp" required>
 
-                        <!-- Opções de Pagamento -->
-<div class="form-group">
-    <label style="display: block; margin-bottom: 10px; font-weight: 600;">
-        💳 Forma de Pagamento
-    </label>
-    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 15px; background: #f0f0f0; border-radius: 8px; border: 2px solid transparent;">
-            <input type="radio" name="pagamento" value="pix" required>
-            📱 PIX
+    <!-- Opções de Pagamento -->
+    <div class="form-group">
+        <label style="display: block; margin-bottom: 10px; font-weight: 600;">
+            💳 Forma de Pagamento
         </label>
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 15px; background: #f0f0f0; border-radius: 8px; border: 2px solid transparent;">
-            <input type="radio" name="pagamento" value="dinheiro" required>
-            💰 Dinheiro
-        </label>
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 15px; background: #f0f0f0; border-radius: 8px; border: 2px solid transparent;">
-            <input type="radio" name="pagamento" value="cartao" required>
-            💳 Cartão
-        </label>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 15px; background: #f0f0f0; border-radius: 8px; border: 2px solid transparent;">
+                <input type="radio" name="pagamento" value="pix" required> 📱 PIX
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 15px; background: #f0f0f0; border-radius: 8px; border: 2px solid transparent;">
+                <input type="radio" name="pagamento" value="dinheiro" required> 💰 Dinheiro
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 15px; background: #f0f0f0; border-radius: 8px; border: 2px solid transparent;">
+                <input type="radio" name="pagamento" value="cartao" required> 💳 Cartão
+            </label>
+        </div>
     </div>
-</div>
 
-<!-- Observação (opcional) -->
-<div class="form-group" id="observacaoGroup" style="display: none;">
-    <label>Observação (opcional)</label>
-    <textarea id="observacao" rows="2" placeholder="Ex: Troco para R$ 50,00, sem cebola, etc..."></textarea>
-</div>
-                    </form>
+    <!-- Observação (opcional) -->
+    <div class="form-group" id="observacaoGroup" style="display: none;">
+        <label>Observação (opcional)</label>
+        <textarea id="observacao" rows="2" placeholder="Ex: Troco para R$ 50,00, sem cebola, etc..."></textarea>
+    </div>
+
+    <!-- BOTÃO DE FINALIZAR - AGORA POR ÚLTIMO -->
+    <button type="submit" class="checkout-btn" id="checkoutBtn" disabled>
+        Finalizar Pedido
+    </button>
+</form>
+
                 </div>
             </div>
         </section>
