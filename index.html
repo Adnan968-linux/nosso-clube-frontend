@@ -1672,7 +1672,7 @@
                 statusText = '⏳ Pendente';
         }
         
-        // CORREÇÃO: Buscar o nome do item no menuItems
+        // Buscar o nome do item no menuItems
         let itemsHtml = '';
         if (order.itens && order.itens.length > 0) {
             itemsHtml = order.itens.map(item => {
@@ -1696,6 +1696,18 @@
             itemsHtml = '<p class="order-item-row">Itens não disponíveis</p>';
         }
         
+        // Determinar classe do badge de pagamento
+        let pagamentoClass = '';
+        let pagamentoTexto = order.forma_pagamento || 'Não informado';
+        
+        if (pagamentoTexto.includes('PIX')) {
+            pagamentoClass = 'pix';
+        } else if (pagamentoTexto.includes('Dinheiro')) {
+            pagamentoClass = 'dinheiro';
+        } else if (pagamentoTexto.includes('Cartão')) {
+            pagamentoClass = 'cartao';
+        }
+        
         div.innerHTML = `
             <div class="order-header">
                 <div>
@@ -1708,6 +1720,11 @@
             <div class="customer-info">
                 <p><i class="fas fa-user"></i> <strong>Cliente:</strong> ${order.cliente_nome || 'Cliente'}</p>
                 <p><i class="fas fa-phone"></i> <strong>WhatsApp:</strong> ${order.cliente_telefone || '---'}</p>
+            </div>
+            
+            <div class="pagamento-info" style="margin: 10px 0; padding: 8px; background: #f5f5f5; border-radius: 5px;">
+                <p><strong>💳 Forma de Pagamento:</strong> <span class="pagamento-badge ${pagamentoClass}">${pagamentoTexto}</span></p>
+                ${order.observacao ? `<p><strong>📝 Observação:</strong> ${order.observacao}</p>` : ''}
             </div>
             
             <div class="order-items">
@@ -1744,12 +1761,6 @@
         
         ordersContainer.appendChild(div);
     });
-// Dentro do div.innerHTML, após o customer-info, adicione:
-<div class="pagamento-info" style="margin: 10px 0; padding: 8px; background: #f5f5f5; border-radius: 5px;">
-    <p><strong>💳 Forma de Pagamento:</strong> <span class="pagamento-badge ${order.forma_pagamento ? order.forma_pagamento.toLowerCase().includes('pix') ? 'pix' : order.forma_pagamento.toLowerCase().includes('dinheiro') ? 'dinheiro' : 'cartao' : ''}">${order.forma_pagamento || 'Não informado'}</span></p>
-    ${order.observacao ? `<p><strong>📝 Observação:</strong> ${order.observacao}</p>` : ''}
-</div>
-
 }
 
         function renderSpecialsAdmin() {
