@@ -1893,7 +1893,7 @@
             checkoutBtn.disabled = false;
         }
 
-        async function checkout(e) {
+          async function checkout(e) {
     e.preventDefault();
     
     if (!customerName.value || !customerPhone.value) {
@@ -1901,8 +1901,9 @@
         return;
     }
     
-    // Verificar se uma forma de pagamento foi selecionada
+    // CORREÇÃO: Pegar o valor do radio button selecionado
     const pagamentoSelecionado = document.querySelector('input[name="pagamento"]:checked');
+    
     if (!pagamentoSelecionado) {
         showToast('Selecione uma forma de pagamento!', 'error');
         return;
@@ -1911,74 +1912,57 @@
     const formaPagamento = pagamentoSelecionado.value;
     const observacao = document.getElementById('observacao').value;
     
-    // Mapear emoji para exibição
-    const pagamentoEmoji = {
-        'pix': '📱 PIX',
-        'dinheiro': '💰 Dinheiro',
-        'cartao': '💳 Cartão'
+    // Converter para o texto com emoji
+    let pagamentoTexto = '';
+    if (formaPagamento === 'pix') pagamentoTexto = '📱 PIX';
+    else if (formaPagamento === 'dinheiro') pagamentoTexto = '💰 Dinheiro';
+    else if (formaPagamento === 'cartao') pagamentoTexto = '💳 Cartão';
+    
+    console.log('💰 Forma de pagamento selecionada:', formaPagamento);
+    console.log('💰 Texto a ser enviado:', pagamentoTexto);
+    
+    const pedidoData = {
+        cliente_nome: customerName.value,
+        cliente_telefone: customerPhone.value,
+        items: cart.map(item => ({
+            id: item.id,
+            quantity: item.quantity,
+            price: item.price,
+            name: item.name
+        })),
+        forma_pagamento: pagamentoTexto,
+        observacao: observacao || ''
     };
+    
+    console.log('📦 Pedido completo:', pedidoData);
     
     try {
         const response = await fetch(`${API_URL}/pedidos`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                cliente_nome: customerName.value,
-                cliente_telefone: customerPhone.value,
-                items: cart.map(item => ({
-                    id: item.id,
-                    quantity: item.quantity,
-                    price: item.price,
-                    name: item.name
-                })),
-                forma_pagamento: pagamentoEmoji[formaPagamento],
-                observacao: observacao || ''
-            })
+            body: JSON.stringify(pedidoData)
         });
         
+        const responseText = await response.text();
+        console.log('📊 Resposta:', responseText);
+        
         if (response.ok) {
-            const data = await response.json();
-            
-            const novoPedido = {
-                id: Date.now(),
-                numero_pedido: data.numero_pedido,
-                cliente_nome: customerName.value,
-                cliente_telefone: customerPhone.value,
-                total: data.total,
-                status: 'pending',
-                created_at: new Date().toISOString(),
-                forma_pagamento: pagamentoEmoji[formaPagamento],
-                observacao: observacao || '',
-                itens: cart.map(item => ({
-                    nome: item.name,
-                    quantidade: item.quantity,
-                    preco_unitario: item.price,
-                    subtotal: item.price * item.quantity
-                }))
-            };
-            
-            orders.unshift(novoPedido);
-            
-            if (isLoggedIn) {
-                mostrarNotificacaoPedido(novoPedido);
-                renderOrders();
-            }
-            
-            unreadOrders++;
-            
-            showToast(`Pedido #${data.numero_pedido} realizado! Forma de pagamento: ${pagamentoEmoji[formaPagamento]}`, 'success');
+            const data = JSON.parse(responseText);
+            showToast(`Pedido #${data.numero_pedido} realizado! Pagamento: ${pagamentoTexto}`, 'success');
             
             cart = [];
             updateCart();
             checkoutForm.reset();
             
-            // Resetar opções de pagamento
+            // Limpar seleção dos radios
             document.querySelectorAll('input[name="pagamento"]').forEach(r => r.checked = false);
             document.getElementById('observacao').value = '';
             
+            if (isLoggedIn) {
+                loadPedidos();
+            }
         } else {
-            const error = await response.text();
-            showToast('Erro no pedido: ' + error, 'error');
+            showToast('Erro: ' + responseText, 'error');
         }
     } catch (error) {
         console.error('Erro:', error);
